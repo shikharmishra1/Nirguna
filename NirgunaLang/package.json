@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "xregexp": "^5.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^18.16.3"
+  }
+}

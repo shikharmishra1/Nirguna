@@ -4,14 +4,13 @@ exports.Ttoken = void 0;
 //Ttoken is the datatype
 var Ttoken;
 (function (Ttoken) {
-    Ttoken["Number"] = "Number";
-    Ttoken["Identifier"] = "Identifier";
-    Ttoken["Equals"] = "Equals";
-    Ttoken["Comma"] = "Comma";
-    Ttoken["OpenParanthesis"] = "OpenParanthesis";
-    Ttoken["CloseParanthesis"] = "CloseParanthesis";
-    Ttoken["BinaryOperator"] = "BinaryOperator";
-    Ttoken["Variable"] = "Variable";
+    Ttoken[Ttoken["Number"] = 0] = "Number";
+    Ttoken[Ttoken["Identifier"] = 1] = "Identifier";
+    Ttoken[Ttoken["Equals"] = 2] = "Equals";
+    Ttoken[Ttoken["OpenParanthesis"] = 3] = "OpenParanthesis";
+    Ttoken[Ttoken["CloseParanthesis"] = 4] = "CloseParanthesis";
+    Ttoken[Ttoken["BinaryOperator"] = 5] = "BinaryOperator";
+    Ttoken[Ttoken["Variable"] = 6] = "Variable";
 })(Ttoken = exports.Ttoken || (exports.Ttoken = {}));
 const KEYWORDS = {
     "परिवर्तनीय": Ttoken.Variable
@@ -19,9 +18,9 @@ const KEYWORDS = {
 function token(value = "", type) {
     return { value, type };
 }
-function isSkippable(token) {
-    return token === ' ' || token === '\n' || token === '\t';
-}
+
+
+
 function* tokenize(inputCode) {
     const src = inputCode.split("");
     const XRegExp = require("xregexp");
@@ -42,30 +41,26 @@ function* tokenize(inputCode) {
         else if (/^\d+$/.test(src[0])) {
             yield token(src.shift(), Ttoken.Number);
         }
-        else if (src[0] === ',') {
-            yield token(src.shift(), Ttoken.Comma);
-        }
         else if (hindiIdentifierRegex.test(src[0])) {
             let identifier = "";
             while (src.length > 0 && hindiIdentifierRegex.test(src[0])) {
                 identifier += src.shift();
             }
             if (KEYWORDS[identifier]) {
-                yield token(identifier, Ttoken.Variable);
+                yield token(identifier, KEYWORDS[identifier]);
             }
             else {
                 yield token(identifier, Ttoken.Identifier);
             }
         }
-        else if (isSkippable(src[0])) {
-            src.shift();
-        }
+        
         else {
             throw new Error(`Invalid token: ${src[0]}`);
         }
+
     }
 }
-const inputCode = "गणित परिवर्तनीय की विधियाँ (संख्या एक, संख्या दो)";
+const inputCode = "गणित की ";
 for (const token of tokenize(inputCode)) {
     console.log(token);
 }
