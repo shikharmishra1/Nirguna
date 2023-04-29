@@ -2,12 +2,13 @@
 //Ttoken is the datatype
 export enum Ttoken
 {
-    Number = "Number",
+    
     Identifier="Identifier",
     Equals="Equals",
     Comma="Comma",
     OpenParanthesis="OpenParanthesis", CloseParanthesis="CloseParanthesis",
     BinaryOperator="BinaryOperator",
+    Number="Number",
     Variable="Variable",
 
 
@@ -48,9 +49,8 @@ function* tokenize(inputCode:string) {
         yield token(src.shift(), Ttoken.Equals);
       } else if (["+","-","*","/"].includes(src[0])) {
         yield token(src.shift(), Ttoken.BinaryOperator);
-      } else if (/^\d+$/.test(src[0])) {
-        yield token(src.shift(), Ttoken.Number);
-      } else if(src[0]===','){
+      }
+       else if(src[0]===','){
         yield token(src.shift(), Ttoken.Comma);
       }
        else if (hindiIdentifierRegex.test(src[0])) {
@@ -63,10 +63,18 @@ function* tokenize(inputCode:string) {
         } else {
           yield token(identifier, Ttoken.Identifier);
         }
-      } 
+      }
+      else if (/^[\d.]+$/.test(src[0])) {
+        let num = "";
+        while (src.length > 0 && /^\d$/.test(src[0])) {
+          num += src.shift();
+        }
+        yield token(num, Ttoken.Number);
+      }
+   
       else if (isSkippable(src[0])) {
         src.shift();
-    }
+        }
       
       else {
         throw new Error(`Invalid token: ${src[0]}`);
@@ -74,7 +82,7 @@ function* tokenize(inputCode:string) {
     }
   }
   
-const inputCode = "गणित परिवर्तनीय की विधियाँ (संख्या एक, संख्या दो)";
+const inputCode = "परिवर्तनीय अ = 10+10";
 for (const token of tokenize(inputCode)) {
   console.log(token);
 }
