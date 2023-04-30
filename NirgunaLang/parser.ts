@@ -10,122 +10,120 @@ import {
   StatementNode,
 } from "./AST";
 
-function parse(inputCode: string): AstNode {
-  const tokens:Token[] = [...tokenize(inputCode)]
-  let currentTokenIndex = 0;
+export function parse(inputCode: string): AstNode {
+    let tokens:Token[] = [...tokenize(inputCode)]
 
-  function getNextToken(): Token {
-
-    const token = tokens[currentTokenIndex++];
-    if(!token || token.type === Ttoken.EndOfFile)
-        return { type: Ttoken.EndOfFile, value: "EOF" };
-    return token;
-  }
-
-function parseExpression(): AstNode {
-    let left = parseTerm();
     
-    while(true && getNextToken().type !== Ttoken.EndOfFile)
+    //determines if parser have reached the end of the file
+    function notEOF(): boolean {
+        return tokens[0].type != Ttoken.EndOfFile;
+        
+      }
+
+
+
+    //return previous token and advances to next one
+    function advance():Token
     {
-        const token = getNextToken();
-        if (!token) {
-            throw new Error("Unexpected end of input");
-          }
+        const previousToken = tokens.shift() as Token;
+        return previousToken;
+    }
+
+    function expect(type: Ttoken, error: any):Token {
+        const previousToken = tokens.shift() as Token;
+        if (!previousToken || previousToken.type != type) {
+          console.error("Parser Error:\n", error, previousToken, " - Expecting: ", type);
           
-        if(token.type !== Ttoken.BinaryOperator)
+        }
+    
+        return previousToken;
+      }
+    
+    function parseStatement():AstNode
+    {
+        return parseExpression();
+    }
+
+    function parseExpression():AstNode
+    {
+        return parseAdditiveExpression();
+    }
+    function parseAdditiveExpression():AstNode
+    {
+        let left = parseMultiplicativeExpression();
+        while(tokens[0].value=="+"||tokens[0].value=="-")
         {
-            const right = parseTerm();
+            const operator = advance().value;
+            const right = parseMultiplicativeExpression();
             left = {
                 type: AstNodeType.BinaryExpression,
-                operator: token.value,
+                operator:operator,
                 left,
-                right
-            } as BinaryExpressionNode;
+                right,
+              } as BinaryExpressionNode;
         }
-        else {
-            currentTokenIndex--;
-            break;
+        return left;
+    }
+    function parseMultiplicativeExpression():AstNode
+    {
+        let left = parsePrimaryExpression();
+        while(tokens[0].value=="*"||tokens[0].value=="/")
+        {
+            const operator = advance().value;
+            const right = parsePrimaryExpression();
+            left = {
+                type: AstNodeType.BinaryExpression,
+                operator:operator,
+                left,
+                right,
+              } as BinaryExpressionNode;
+        }
+        return left;
+    }
+    
+    function parsePrimaryExpression():AstNode
+    {
+        const token = tokens[0].type;
+
+        switch (token) {
+            // User defined values.
+            case Ttoken.Identifier:
+              return { type: AstNodeType.Identifier, name: advance().value } as IdentifierNode;
+        
+            // Constants and Numeric Constants
+            case Ttoken.Number:
+              return {
+                type: AstNodeType.NumericLiteral,
+                value: parseFloat(advance().value),
+              } as NumericLiteralNode;
+        
+            // Grouping Expressions
+            case Ttoken.OpenParanthesis: {
+              advance(); // advance the opening paren
+              const value = parseExpression();
+              expect(
+                Ttoken.CloseParanthesis,
+                "Unexpected token found inside parenthesized expression. Expected closing parenthesis.",
+              ); // closing paren
+              return value;
+            }
+        
+            // Unidentified Tokens and Invalid Code Reached
+            default:
+              throw new Error("Unexpected token found during parsing!"+ tokens[0]);
+              
           }
 
     }
-    return left
-    
-}
-
-function parseTerm(): AstNode {
-    let token = getNextToken();
-    switch(token.type) {
-        case Ttoken.Identifier:
-        return {
-            type: AstNodeType.Identifier,
-            name: token.value
-        } as IdentifierNode;
-
-        case Ttoken.Number:
-        return {
-          type: AstNodeType.NumericLiteral,
-          value: parseInt(token.value),
-        } as NumericLiteralNode;
-
-        case Ttoken.OpenParanthesis:
-        const expression = parseExpression();
-        if (getNextToken().type !== Ttoken.CloseParanthesis) {
-          throw new Error("Expected ')' after expression");
-        }
-        return expression;
-        default:
-            {
-                console.log(token.value)
-                throw new Error(`Unexpected token ${token.value}`);
-            }
-            
-    }
-}
-
-function parseVariableDecleration(): AstNode {
-    const nameToken = getNextToken();
-    if(nameToken.type !== Ttoken.Identifier)
-    {
-        console.log(nameToken.type)
-        throw new Error(`"परिवर्तनीय" के बाद अपेक्षित पहचानकर्ता(identifier) लिखें जैसे की "परिवर्तनीय अ = १००"`);
-    }
-    if (getNextToken().type !== Ttoken.Equals) {
-        throw new Error(` "=" की अपेछा थी पर आपने "${nameToken.value}" के बाद "${getNextToken().value}" लिखा है`);
-      }
-    const value = parseExpression();
+    const body:AstNode[] =[];
+    while (notEOF()) {
+        const statement = parseStatement();
+        body.push(statement);
+     }
     return {
-    type: AstNodeType.VariableDeclaration,
-    name: nameToken.value,
-    value,
-    } as VariableDeclarationNode;
-
-}
-
-function parseStatement(): AstNode {
-    const token = getNextToken();
-    if (token.type === Ttoken.Variable) {
-      return parseVariableDecleration();
-    }
-    currentTokenIndex--;
-    const expression = parseExpression();
-    return {
-      type: AstNodeType.Statement,
-      expression,
-    } as StatementNode;
-}
-
-const body:AstNode[] =[];
-while (currentTokenIndex < tokens.length) {
-    const statement = parseStatement();
-    body.push(statement);
-  }
-  return {
-    type: AstNodeType.Program,
-    body,
-  } as ProgramNode;
+        type: AstNodeType.Program,
+        body,
+     } as ProgramNode;
   
 }
 
-const inputCode = "परिवर्तनीय अ = 10";
-const ast = parse(inputCode);
-console.log(JSON.stringify(ast, null, 2));
