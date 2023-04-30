@@ -1,5 +1,5 @@
 
-//Ttoken is the datatype
+//type of token
 export enum Ttoken
 {
     
@@ -10,6 +10,7 @@ export enum Ttoken
     BinaryOperator="BinaryOperator",
     Number="Number",
     Variable="Variable",
+    EndOfFile="EndOfFile"
 
 
 }
@@ -21,6 +22,7 @@ export interface Token
     type:Ttoken
 }
 
+//defines keywords in the language
 const KEYWORDS:Record<string, Ttoken> = {
     "परिवर्तनीय":Ttoken.Variable
 }
@@ -36,10 +38,14 @@ function isSkippable(token:string) {
     return token === ' '|| token=== '\n' || token === '\t'
 }
 
-function* tokenize(inputCode:string) {
+export function* tokenize(inputCode:string):Generator<Token> {
     const src = inputCode.split("");
+
     const XRegExp = require("xregexp");
+
     const hindiIdentifierRegex = XRegExp("^\\p{Devanagari}[_\\p{Devanagari}\\d]*$");
+
+    //tokenizes the input code, yielding tokens one by one to save memory
     while (src.length > 0) {
       if (src[0] === "(") {
         yield token(src.shift(), Ttoken.OpenParanthesis);
@@ -53,6 +59,7 @@ function* tokenize(inputCode:string) {
        else if(src[0]===','){
         yield token(src.shift(), Ttoken.Comma);
       }
+      //handles identifiers and keywords
        else if (hindiIdentifierRegex.test(src[0])) {
         let identifier = "";
         while (src.length > 0 && hindiIdentifierRegex.test(src[0])) {
@@ -64,6 +71,8 @@ function* tokenize(inputCode:string) {
           yield token(identifier, Ttoken.Identifier);
         }
       }
+
+      //handles numbers
       else if (/^[\d.]+$/.test(src[0])) {
         let num = "";
         while (src.length > 0 && /^\d$/.test(src[0])) {
@@ -79,10 +88,14 @@ function* tokenize(inputCode:string) {
       else {
         throw new Error(`Invalid token: ${src[0]}`);
       }
+      
     }
+
+    //defines end of file
+    yield token("EOF", Ttoken.EndOfFile);
   }
   
-const inputCode = "परिवर्तनीय अ = 10+10";
+  const inputCode = "परिवर्तनीय अ = 10";
 for (const token of tokenize(inputCode)) {
   console.log(token);
 }
