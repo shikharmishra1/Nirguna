@@ -95,7 +95,5 @@ export function* tokenize(inputCode:string):Generator<Token> {
     yield token("EOF", Ttoken.EndOfFile);
   }
   
-  const inputCode = "परिवर्तनीय अ = 10";
-for (const token of tokenize(inputCode)) {
-  console.log(token);
-}
+  
+
