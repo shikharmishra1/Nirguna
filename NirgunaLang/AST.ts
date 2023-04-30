@@ -4,8 +4,13 @@ export enum AstNodeType {
     Identifier = "Identifier",
     NumericLiteral = "Literal",
     VariableDeclaration = "VariableDeclaration",
+    Statement = "Statement",
   }
-  
+
+  export interface StatementNode extends AstNode {
+    type: AstNodeType.Statement;
+    expression: AstNode;
+  }
   export interface AstNode {
     type: AstNodeType;
   }
