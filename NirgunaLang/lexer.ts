@@ -4,6 +4,7 @@ export enum Ttoken
 {
     
     Identifier="Identifier",
+    Null="Null",
     Equals="Equals",
     Comma="Comma",
     OpenParanthesis="OpenParanthesis", CloseParanthesis="CloseParanthesis",
@@ -24,7 +25,8 @@ export interface Token
 
 //defines keywords in the language
 const KEYWORDS:Record<string, Ttoken> = {
-    "परिवर्तनीय":Ttoken.Variable
+    परिवर्तनीय:Ttoken.Variable,
+    निर्गुण:Ttoken.Null,
 }
 
 
@@ -65,11 +67,12 @@ export function* tokenize(inputCode:string):Generator<Token> {
         while (src.length > 0 && hindiIdentifierRegex.test(src[0])) {
           identifier += src.shift();
         }
-        if (KEYWORDS[identifier]) {
-          yield token(identifier, Ttoken.Variable);
+        if (typeof(KEYWORDS[identifier])) {
+          yield token(identifier, KEYWORDS[identifier]);
         } else {
           yield token(identifier, Ttoken.Identifier);
         }
+        
       }
 
       //handles numbers

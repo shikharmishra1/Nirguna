@@ -3,6 +3,7 @@ export enum AstNodeType {
     BinaryExpression = "BinaryExpression",
     Identifier = "Identifier",
     NumericLiteral = "Literal",
+    NullLiteral = "NullLiteral",
     VariableDeclaration = "VariableDeclaration",
     Statement = "Statement",
   }
@@ -36,7 +37,12 @@ export enum AstNodeType {
     type: AstNodeType.NumericLiteral;
     value: number;
   }
-  
+
+  export interface NullLiteralNode extends AstNode {
+    type: AstNodeType.NullLiteral;
+    value: "निर्गुण";
+  }
+
   export interface VariableDeclarationNode extends AstNode {
     type: AstNodeType.VariableDeclaration;
     name: string;

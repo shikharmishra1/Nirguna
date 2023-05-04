@@ -6,6 +6,7 @@ import {
   IdentifierNode,
   NumericLiteralNode,
   ProgramNode,
+  NullLiteralNode,
   VariableDeclarationNode,
   StatementNode,
 } from "./AST";
@@ -108,6 +109,13 @@ export function parse(inputCode: string): AstNode {
               ); // closing paren
               return value;
             }
+            case Ttoken.Null:
+              advance(); // advance the null token
+              console.log("Null Literal Found")
+              return {
+                type: AstNodeType.NullLiteral,
+                value:  "निर्गुण",
+              } as NullLiteralNode;
         
             // Unidentified Tokens and Invalid Code Reached
             default:
