@@ -50,6 +50,7 @@ export function parse(inputCode: string): AstNode {
     }
     function parseAdditiveExpression():AstNode
     {
+        //
         let left = parseMultiplicativeExpression();
         while(tokens[0].value=="+"||tokens[0].value=="-")
         {
@@ -67,7 +68,7 @@ export function parse(inputCode: string): AstNode {
     function parseMultiplicativeExpression():AstNode
     {
         let left = parsePrimaryExpression();
-        while(tokens[0].value=="*"||tokens[0].value=="/")
+        while(tokens[0].value=="*"||tokens[0].value=="/"||tokens[0].value=="%")
         {
             const operator = advance().value;
             const right = parsePrimaryExpression();
@@ -110,7 +111,7 @@ export function parse(inputCode: string): AstNode {
         
             // Unidentified Tokens and Invalid Code Reached
             default:
-              throw new Error("Unexpected token found during parsing!"+ tokens[0]);
+              throw new Error("Unexpected token found during parsing!"+ [tokens[0].type, tokens[0].value]);
               
           }
 

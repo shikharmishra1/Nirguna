@@ -53,7 +53,7 @@ export function* tokenize(inputCode:string):Generator<Token> {
         yield token(src.shift(), Ttoken.CloseParanthesis);
       } else if (src[0] === "=") {
         yield token(src.shift(), Ttoken.Equals);
-      } else if (["+","-","*","/"].includes(src[0])) {
+      } else if (["+","-","*","/","%"].includes(src[0])) {
         yield token(src.shift(), Ttoken.BinaryOperator);
       }
        else if(src[0]===','){
