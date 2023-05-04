@@ -16,6 +16,25 @@ export enum Ttoken
 
 }
 
+const hindiToStandardDigits: { [key: string]: string } = {
+  "०": "0",
+  "१": "1",
+  "२": "2",
+  "३": "3",
+  "४": "4",
+  "५": "5",
+  "६": "6",
+  "७": "7",
+  "८": "8",
+  "९": "9"
+};
+
+
+function convertHindiToStandardDigits(str:string) {
+  return str.replace(/[०-९]/g, (match:string) => hindiToStandardDigits[match]);
+}
+
+
 
 export interface Token
 {
@@ -44,11 +63,15 @@ export function* tokenize(inputCode:string):Generator<Token> {
     const src = inputCode.split("");
 
     const XRegExp = require("xregexp");
+    
+    const hindiIdentifierRegex = XRegExp("^\\p{Devanagari}\\P{Nd}_*$");
 
-    const hindiIdentifierRegex = XRegExp("^\\p{Devanagari}[_\\p{Devanagari}\\d]*$");
 
+    
     //tokenizes the input code, yielding tokens one by one to save memory
     while (src.length > 0) {
+      const uwu = convertHindiToStandardDigits(src[0]);
+      
       if (src[0] === "(") {
         yield token(src.shift(), Ttoken.OpenParanthesis);
       } else if (src[0] === ")") {
@@ -63,6 +86,7 @@ export function* tokenize(inputCode:string):Generator<Token> {
       }
       //handles identifiers and keywords
        else if (hindiIdentifierRegex.test(src[0])) {
+        
         let identifier = "";
         while (src.length > 0 && hindiIdentifierRegex.test(src[0])) {
           identifier += src.shift();
@@ -74,12 +98,14 @@ export function* tokenize(inputCode:string):Generator<Token> {
         }
         
       }
-
+      
       //handles numbers
-      else if (/^[\d.]+$/.test(src[0])) {
+      else if (/^[\d.]+$/.test(convertHindiToStandardDigits(src[0]))) {
         let num = "";
-        while (src.length > 0 && /^\d$/.test(src[0])) {
-          num += src.shift();
+       
+        while (src.length > 0 && /^[\d.]$/.test(convertHindiToStandardDigits(src[0]))) {
+          num += convertHindiToStandardDigits(src.shift()??"");
+          
         }
         yield token(num, Ttoken.Number);
       }
@@ -97,6 +123,9 @@ export function* tokenize(inputCode:string):Generator<Token> {
     //defines end of file
     yield token("EOF", Ttoken.EndOfFile);
   }
+  const input = "४१ + ४१";
+  const tokens = [...tokenize(input)];
+  console.log(tokens);
   
   
 
