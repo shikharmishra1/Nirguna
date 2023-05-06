@@ -98,7 +98,7 @@ export function* tokenize(inputCode:string):Generator<Token> {
           
           yield token(identifier, KEYWORDS[identifier]);
         } else {
-          console.log(identifier);
+          
           yield token(identifier, Ttoken.Identifier);
         }
         
