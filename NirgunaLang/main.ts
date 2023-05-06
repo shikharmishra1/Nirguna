@@ -2,10 +2,9 @@ import {parse} from './parser'
 import * as readline from 'readline';
 import {evaluate} from './runtime/interpretor'
 import Environment from './runtime/environment';
-import { NumericValueNode, ValueNodeType } from './runtime/values';
+import { MK_BOOL, MK_NUMBER, NumericValueNode, ValueNodeType } from './runtime/values';
 
 const env = new Environment
-env.declare('अ', {type:ValueNodeType.NumericLiteral, value:100} as NumericValueNode)
 
 function run() {
   rl.question(">", function(input) {

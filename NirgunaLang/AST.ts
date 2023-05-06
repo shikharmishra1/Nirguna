@@ -6,6 +6,7 @@ export enum AstNodeType {
     NullLiteral = "NullLiteral",
     VariableDeclaration = "VariableDeclaration",
     Statement = "Statement",
+    
   }
 
   export interface StatementNode extends AstNode {
@@ -45,7 +46,8 @@ export enum AstNodeType {
 
   export interface VariableDeclarationNode extends AstNode {
     type: AstNodeType.VariableDeclaration;
+    isConstant: boolean;
     name: string;
-    value: AstNode;
+    value?: AstNode;
   }
   

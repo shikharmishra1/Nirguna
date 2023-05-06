@@ -4,14 +4,19 @@ export enum Ttoken
 {
     
     Identifier="Identifier",
-    Null="Null",
     Equals="Equals",
     Comma="Comma",
     OpenParanthesis="OpenParanthesis", CloseParanthesis="CloseParanthesis",
     BinaryOperator="BinaryOperator",
     Number="Number",
+    EndOfFile="EndOfFile",
+    PurnaViraam="PurnaViraam",
+
+    //keywords
+    Constant="Constant",
     Variable="Variable",
-    EndOfFile="EndOfFile"
+    Null="Null",
+    
 
 
 }
@@ -46,6 +51,7 @@ export interface Token
 const KEYWORDS:Record<string, Ttoken> = {
     मान:Ttoken.Variable,
     निर्गुण:Ttoken.Null,
+    नित्य:Ttoken.Constant,
 }
 
 
@@ -79,10 +85,14 @@ export function* tokenize(inputCode:string):Generator<Token> {
         yield token(src.shift(), Ttoken.OpenParanthesis);
       } else if (src[0] === ")") {
         yield token(src.shift(), Ttoken.CloseParanthesis);
-      } else if (src[0] === "=") {
-        yield token(src.shift(), Ttoken.Equals);
       } else if (["+","-","*","/","%"].includes(src[0])) {
         yield token(src.shift(), Ttoken.BinaryOperator);
+      } else if (src[0] === "।") {
+        yield token(src.shift(), Ttoken.PurnaViraam);
+      } else if (["+","-","*","/","%"].includes(src[0])) {
+        yield token(src.shift(), Ttoken.BinaryOperator);
+      } else if(src[0]==='='){
+        yield token(src.shift(), Ttoken.Equals);
       }
        else if(src[0]===','){
         yield token(src.shift(), Ttoken.Comma);
