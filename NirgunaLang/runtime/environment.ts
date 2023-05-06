@@ -1,22 +1,27 @@
+import { ok } from 'assert';
 import {ValueNode} from './values'
 
 export default class Environment{
     private parent?:Environment;
     private variables:Map<string, ValueNode>;
+    private constants:Set<string>
 
     constructor(parentEnv?:Environment)
     {
         this.parent = parentEnv;
         this.variables = new Map();
+        this.constants = new Set();
     }
 
     //declares variable
-    public declare(name:string, value:ValueNode): ValueNode
+    public declare(name:string, value:ValueNode, isConstant:boolean): ValueNode
     {
         if(this.variables.has(name))
         {
             throw 'मान '+{name}+' पहले से ही परिभाषित है इसलिए उसे दोबारा घोषित नहीं किया जा सकता।'
         }
+        if(isConstant)
+          this.constants.add(name);
         this.variables.set(name, value)
         return value;
     }
