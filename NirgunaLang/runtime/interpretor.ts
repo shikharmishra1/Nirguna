@@ -1,7 +1,8 @@
 import { NullValueNode, NumericValueNode, ValueNode, ValueNodeType} from "./values";
-import {AstNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode} from "../AST"
+import {AstNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode} from "../AST"
+import Environment from "./environment";
 
-export function evaluate(astNode:AstNode) : ValueNode
+export function evaluate(astNode:AstNode, env:Environment) : ValueNode
 {
     switch(astNode.type)
     {
@@ -19,17 +20,33 @@ export function evaluate(astNode:AstNode) : ValueNode
                 
             } as NullValueNode;
         case AstNodeType.BinaryExpression:
-            return evaluateBinaryExpression(astNode as BinaryExpressionNode);
+            return evaluateBinaryExpression(astNode as BinaryExpressionNode, env);
+
+        case AstNodeType.Identifier:
+            return evaluateIdentifier(astNode as IdentifierNode, env);
+        
+        case AstNodeType.VariableDeclaration:
+            return evaluateVariableDeclaration(astNode as VariableDeclarationNode, env)
+
 
         case AstNodeType.Program:
-            return evaluateProgram(astNode as ProgramNode);
+            return evaluateProgram(astNode as ProgramNode, env);
+
+        
         
         default:
-            throw new Error("can not interpret this node "+astNode+"");
+            throw new Error("can not interpret this node "+JSON.stringify(astNode)+"");
     }
             
     
 }
+
+function evaluateIdentifier(identifier:IdentifierNode, env:Environment):ValueNode
+{
+    const value = env.lookup(identifier.name)
+    return value
+}
+
 
 function evaluateNumericBinExp(left:NumericValueNode, right:NumericValueNode, operator: string):NumericValueNode
     {
@@ -55,14 +72,15 @@ function evaluateNumericBinExp(left:NumericValueNode, right:NumericValueNode, op
                 break;
             
         }
+        
         console.log(result);
         return {type:ValueNodeType.NumericLiteral,value:result }
     }
 
-function evaluateBinaryExpression(operation:BinaryExpressionNode):ValueNode
+function evaluateBinaryExpression(operation:BinaryExpressionNode, env:Environment):ValueNode
 {
-    const left = evaluate(operation.left);
-    const right = evaluate(operation.right);
+    const left = evaluate(operation.left, env);
+    const right = evaluate(operation.right, env);
 
     if (left.type == ValueNodeType.NumericLiteral && right.type == ValueNodeType.NumericLiteral) {
         
@@ -72,13 +90,20 @@ function evaluateBinaryExpression(operation:BinaryExpressionNode):ValueNode
     
 }
 
-function evaluateProgram(program: ProgramNode): ValueNode {
+function evaluateProgram(program: ProgramNode, env:Environment): ValueNode {
         let lastStatement:ValueNode = {type: ValueNodeType.NullLiteral , value:"निर्गुण"} as NullValueNode;
         for(const statement of program.body)
         {
-            lastStatement = evaluate(statement);
+            lastStatement = evaluate(statement, env);
         }
         return lastStatement;
     }
 
+
+
+function evaluateVariableDeclaration(declaration: VariableDeclarationNode, env: Environment): ValueNode {
+    //declare variable
+    const value = declaration.value? evaluate(declaration.value, env) : {type: ValueNodeType.NullLiteral , value:"निर्गुण"} as NullValueNode
+    return env.declare(declaration.name, value, declaration.isConstant)
+}
 
