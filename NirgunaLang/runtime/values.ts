@@ -37,7 +37,7 @@ export enum ValueNodeType {
     properties: { key: string; value: ValueNode }[];
   }
   
-  export interface BooleanLiteralNode extends ValueNode {
+  export interface BooleanValueNode extends ValueNode {
     type: ValueNodeType.BooleanLiteral;
     value: boolean;
   }
@@ -45,5 +45,27 @@ export enum ValueNodeType {
   export interface StringLiteralNode extends ValueNode {
     type: ValueNodeType.StringLiteral;
     value: string;
+  }
+
+  export function MK_NUMBER(num:number):NumericValueNode
+  {
+      return {
+          type: ValueNodeType.NumericLiteral,
+          value: num
+      } as NumericValueNode;
+  }
+  export function MK_BOOL(bool:boolean):BooleanValueNode
+  {
+      return {
+          type: ValueNodeType.BooleanLiteral,
+          value:bool
+      } as BooleanValueNode;
+  }
+  export function MK_NULL(str:boolean):NullValueNode
+  {
+      return {
+          type: ValueNodeType.NullLiteral,
+          value:"निर्गुण"
+      } as NullValueNode;
   }
   
