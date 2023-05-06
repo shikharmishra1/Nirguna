@@ -27,6 +27,7 @@ export function parse(inputCode: string): AstNode {
     function advance():Token
     {
         const previousToken = tokens.shift() as Token;
+        
         return previousToken;
     }
 
@@ -42,7 +43,16 @@ export function parse(inputCode: string): AstNode {
     
     function parseStatement():AstNode
     {
-        return parseExpression();
+      switch(tokens[0].type)
+      {
+        default:
+         return parseExpression();
+        
+         case Ttoken.Variable:
+         case Ttoken.Constant: 
+         case Ttoken.Identifier:
+          return parseVariableDeclaration();
+      }
     }
 
     function parseExpression():AstNode
@@ -133,6 +143,42 @@ export function parse(inputCode: string): AstNode {
         type: AstNodeType.Program,
         body,
      } as ProgramNode;
+
+     function parseVariableDeclaration(): AstNode {
+      const isConstant = advance().type == Ttoken.Constant;
+      const identifier = expect(Ttoken.Identifier, "मान की घोषणा के बाद पहचानकर्ता के नाम की अपेक्षा है।").value;
+
+      //type: मान एक । or नित्य एक।
+      if(tokens[0].type==Ttoken.PurnaViraam)
+      {
+        advance();
+
+        if(isConstant)
+        {
+          throw "नित्य मान की घोषणा के बाद एक मान की अपेक्षा है। जैसे कि: नित्य एक = १ ।"
+        }
+        return { 
+          type:AstNodeType.VariableDeclaration, 
+          name:identifier,  
+          isConstant:false,
+         } as VariableDeclarationNode;
+      }
+
+      //type: मान एक = १ ।
+      expect(Ttoken.Equals, "मान की घोषणा के बाद एक मान की अपेक्षा है। जैसे कि: मान एक = १ ।");
+
+      const declaration = {
+        isConstant:isConstant,
+        name: identifier,
+        value: parseExpression(),
+        type: AstNodeType.VariableDeclaration,
+      } as VariableDeclarationNode
+
+      expect(Ttoken.PurnaViraam, "मान की घोषणा के बाद पूर्णविराम (।) की अपेक्षा है। जैसे कि: मान एक = १ ।")
+      return declaration
+    }
   
 }
+
+
 
