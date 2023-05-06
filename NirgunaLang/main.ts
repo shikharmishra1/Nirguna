@@ -1,15 +1,29 @@
 import {parse} from './parser'
 import * as readline from 'readline';
+import {evaluate} from './runtime/interpretor'
+import Environment from './runtime/environment';
+import { NumericValueNode, ValueNodeType } from './runtime/values';
 
-var rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
+const env = new Environment
+env.declare('अ', {type:ValueNodeType.NumericLiteral, value:100} as NumericValueNode)
+
+function run() {
+  rl.question(">", function(input) {
+    const program = parse(input);
+    const result = evaluate(program, env);
+    console.log(JSON.stringify(program, null, 2));
+    console.log(result);
+    if(!input || input.includes("exit"))
+    {
+      process.exit(0);
+    }
+    run();
   });
+}
 
-  rl.question("Enter Code: ", function(input) {
-    const ast = parse(input);
-    console.log(JSON.stringify(ast, null, 2));
-    rl.close();
-  });
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
-
+run();
