@@ -44,7 +44,7 @@ export interface Token
 
 //defines keywords in the language
 const KEYWORDS:Record<string, Ttoken> = {
-    परिवर्तनीय:Ttoken.Variable,
+    'मान':Ttoken.Variable,
     निर्गुण:Ttoken.Null,
 }
 
@@ -64,7 +64,9 @@ export function* tokenize(inputCode:string):Generator<Token> {
 
     const XRegExp = require("xregexp");
     
-    const hindiIdentifierRegex = XRegExp("^\\p{Devanagari}\\P{Nd}_*$");
+    const hindiIdentifierRegex = XRegExp("^\\p{Devanagari}(?!\\p{Nd})[\\p{Devanagari}]*$");
+
+
 
 
     
@@ -86,7 +88,7 @@ export function* tokenize(inputCode:string):Generator<Token> {
       }
       //handles identifiers and keywords
        else if (hindiIdentifierRegex.test(src[0])) {
-        
+        console.log(src[0])
         let identifier = "";
         while (src.length > 0 && hindiIdentifierRegex.test(src[0])) {
           identifier += src.shift();
@@ -123,7 +125,7 @@ export function* tokenize(inputCode:string):Generator<Token> {
     //defines end of file
     yield token("EOF", Ttoken.EndOfFile);
   }
-  const input = "४१ + ४१";
+  const input = "४०१";
   const tokens = [...tokenize(input)];
   console.log(tokens);
   
