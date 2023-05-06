@@ -50,7 +50,6 @@ export function parse(inputCode: string): AstNode {
         
          case Ttoken.Variable:
          case Ttoken.Constant: 
-         case Ttoken.Identifier:
           return parseVariableDeclaration();
       }
     }
