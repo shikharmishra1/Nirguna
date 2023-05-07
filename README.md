@@ -1,6 +1,6 @@
 # Nirguna
 
-Nirguna is an WIP devnagari scripting language 
+Nirguna is an WIP devanagari scripting language 
 
 ## Table of Contents
 
