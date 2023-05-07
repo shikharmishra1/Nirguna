@@ -4,5 +4,11 @@
   },
   "devDependencies": {
     "@types/node": "^18.16.3"
+    
+  },
+  "scripts": {
+    "start": "node ./dist/main.js",
+    "build": "tsc && node ./dist/main.js"
+   
   }
 }
