@@ -9,6 +9,7 @@ import {
   NullLiteralNode,
   VariableDeclarationNode,
   StatementNode,
+  AssignmentExpressionNode,
 } from "./AST";
 
 export function parse(inputCode: string): AstNode {
@@ -56,7 +57,8 @@ export function parse(inputCode: string): AstNode {
 
     function parseExpression():AstNode
     {
-        return parseAdditiveExpression();
+      //return the expression lowest in the precedence
+      return parseAsignmentExpression();
     }
     function parseAdditiveExpression():AstNode
     {
@@ -143,6 +145,21 @@ export function parse(inputCode: string): AstNode {
         body,
      } as ProgramNode;
 
+     function parseAsignmentExpression(): AstNode {
+        
+      const left = parseAdditiveExpression();
+
+      if(tokens[0].type == Ttoken.Equals)
+      {
+        advance(); //advance past equal token
+        const value = parseAsignmentExpression()
+        return {value:value, assigne:left, type:AstNodeType.AssignmentExpression} as AssignmentExpressionNode
+
+      }
+      
+        return left;
+    }
+
      function parseVariableDeclaration(): AstNode {
       const isConstant = advance().type == Ttoken.Constant;
       const identifier = expect(Ttoken.Identifier, "मान की घोषणा के बाद पहचानकर्ता के नाम की अपेक्षा है।").value;
@@ -178,6 +195,8 @@ export function parse(inputCode: string): AstNode {
     }
   
 }
+
+
 
 
 

@@ -1,5 +1,5 @@
 import { NullValueNode, NumericValueNode, ValueNode, ValueNodeType} from "./values";
-import {AstNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode} from "../AST"
+import {AstNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode} from "../AST"
 import Environment from "./environment";
 
 export function evaluate(astNode:AstNode, env:Environment) : ValueNode
@@ -31,11 +31,14 @@ export function evaluate(astNode:AstNode, env:Environment) : ValueNode
 
         case AstNodeType.Program:
             return evaluateProgram(astNode as ProgramNode, env);
+        
+        case AstNodeType.AssignmentExpression:
+            return evaluateAssignmentExpression(astNode as AssignmentExpressionNode, env);
 
         
         
         default:
-            throw new Error("can not interpret this node "+JSON.stringify(astNode)+"");
+            throw "can not interpret this node "+JSON.stringify(astNode)+"";
     }
             
     
@@ -99,7 +102,15 @@ function evaluateProgram(program: ProgramNode, env:Environment): ValueNode {
         return lastStatement;
     }
 
-
+export function evaluateAssignmentExpression(assignment: AssignmentExpressionNode, env: Environment)
+{
+    if(assignment.assigne.type !== AstNodeType.Identifier)
+    {
+        throw 'can not assign to non identifier node \n गैर पहचानकर्ता नोड को आवंटित नहीं किया जा सकता'
+    }
+    const name = (assignment.assigne as IdentifierNode).name
+    return env.assign(name, evaluate(assignment.value, env))
+}
 
 function evaluateVariableDeclaration(declaration: VariableDeclarationNode, env: Environment): ValueNode {
     //declare variable
