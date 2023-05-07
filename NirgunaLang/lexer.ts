@@ -12,6 +12,9 @@ export enum Ttoken
     EndOfFile="EndOfFile",
     PurnaViraam="PurnaViraam",
 
+    //operators
+    ConditionalOperator="Conditional Operator",
+
     //keywords
     Constant="Constant",
     Variable="Variable",
@@ -61,9 +64,13 @@ function token(value="", type:Ttoken):Token
     return {value, type};
 }
 
-function isSkippable(token:string) {
-    return token === ' '|| token=== '\n' || token === '\t'
+function isSkippable(token: string) {
+  return token === " " || token === "\n" || token === "\t" || token === "\r"
+  
+  
 }
+
+
 
 export function* tokenize(inputCode:string):Generator<Token> {
     const src = inputCode.split("");
@@ -74,29 +81,48 @@ export function* tokenize(inputCode:string):Generator<Token> {
     const hindiDigitsRegex = XRegExp("[\\p{Devanagari}\\u0966-\\u096F]+");
 
 
-
-
+    
+    let skipLine = false;
     
     //tokenizes the input code, yielding tokens one by one to save memory
     while (src.length > 0) {
       const uwu = convertHindiToStandardDigits(src[0]);
       
+      if (skipLine) {
+        if (src[0] === "\n") {
+          skipLine = false;
+        }
+        src.shift();
+        continue;
+      }
+      
+      if (src[0] === "#") {
+        skipLine = true;
+        src.shift();
+        continue;
+      }
+
       if (src[0] === "(") {
         yield token(src.shift(), Ttoken.OpenParanthesis);
       } else if (src[0] === ")") {
         yield token(src.shift(), Ttoken.CloseParanthesis);
       } else if (["+","-","*","/","%"].includes(src[0])) {
         yield token(src.shift(), Ttoken.BinaryOperator);
-      } else if (src[0] === "।") {
+      } else if (["<","<=",">=","==",">"].includes(src[0])) {
+        yield token(src.shift(), Ttoken.ConditionalOperator);
+      }
+      
+      else if (src[0] === "।") {
         yield token(src.shift(), Ttoken.PurnaViraam);
       } else if (["+","-","*","/","%"].includes(src[0])) {
         yield token(src.shift(), Ttoken.BinaryOperator);
       } else if(src[0]==='='){
         yield token(src.shift(), Ttoken.Equals);
-      }
+      } 
        else if(src[0]===','){
         yield token(src.shift(), Ttoken.Comma);
       }
+       
       //handles identifiers and keywords
        else if (hindiIdentifierRegex.test(src[0]) && !(/[०-९]/g.test(src[0])) ) {
         
@@ -113,6 +139,8 @@ export function* tokenize(inputCode:string):Generator<Token> {
         }
         
       }
+      //skips comments
+      
       
       //handles numbers
       else if (/^[\d.]+$/.test(convertHindiToStandardDigits(src[0]))) {
