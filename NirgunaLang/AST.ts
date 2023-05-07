@@ -5,8 +5,15 @@ export enum AstNodeType {
     NumericLiteral = "Literal",
     NullLiteral = "NullLiteral",
     VariableDeclaration = "VariableDeclaration",
+    AssignmentExpression = "AssignmentExpression",
     Statement = "Statement",
     
+  }
+
+  export interface AssignmentExpressionNode extends AstNode {
+    type: AstNodeType.AssignmentExpression,
+    assigne:AstNode,
+    value:AstNode,
   }
 
   export interface StatementNode extends AstNode {
