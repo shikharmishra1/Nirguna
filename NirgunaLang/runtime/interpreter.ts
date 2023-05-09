@@ -1,5 +1,5 @@
-import { NullValueNode, NumericValueNode, ValueNode, ValueNodeType} from "./values";
-import {AstNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode} from "../AST"
+import { NullValueNode, NumericValueNode, ObjectValueNode, ValueNode, ValueNodeType} from "./values";
+import {AstNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode, ObjectLiteralNode} from "../AST"
 import Environment from "./environment";
 
 export function evaluate(astNode:AstNode, env:Environment) : ValueNode
@@ -35,6 +35,9 @@ export function evaluate(astNode:AstNode, env:Environment) : ValueNode
         case AstNodeType.AssignmentExpression:
             return evaluateAssignmentExpression(astNode as AssignmentExpressionNode, env);
 
+        case AstNodeType.ObjectLiteral:
+            return evaluateObjectExpression(astNode as ObjectLiteralNode, env);
+
         
         
         default:
@@ -68,6 +71,8 @@ function evaluateNumericBinExp(left:NumericValueNode, right:NumericValueNode, op
                 break;
             case "/":
                 result=left.value/right.value;
+                if(right.value==0)
+                    throw 'division by zero is impossible'
                 break;
 
             case "%":
@@ -76,7 +81,7 @@ function evaluateNumericBinExp(left:NumericValueNode, right:NumericValueNode, op
             
         }
         
-        console.log(result);
+        
         return {type:ValueNodeType.NumericLiteral,value:result }
     }
 
@@ -117,4 +122,15 @@ function evaluateVariableDeclaration(declaration: VariableDeclarationNode, env: 
     const value = declaration.value? evaluate(declaration.value, env) : {type: ValueNodeType.NullLiteral , value:"निर्गुण"} as NullValueNode
     return env.declare(declaration.name, value, declaration.isConstant)
 }
+
+export function evaluateObjectExpression(obj: ObjectLiteralNode, env: Environment) : ValueNode
+{
+    const object = {type:ValueNodeType.ObjectLiteral, properties: new Map()} as ObjectValueNode;
+    for (const {key, value} of obj.properties) {
+        const runtimeValue = (value==undefined) ? env.lookup(key) : evaluate(value, env);
+        //handles valid key: pair
+        object.properties.set(key, runtimeValue)
+    }
+    return object;
+} 
 
