@@ -1,3 +1,5 @@
+import { type } from "os";
+
 export enum AstNodeType {
     Program = "Program",
     BinaryExpression = "BinaryExpression",
@@ -6,14 +8,18 @@ export enum AstNodeType {
     NullLiteral = "NullLiteral",
     VariableDeclaration = "VariableDeclaration",
     AssignmentExpression = "AssignmentExpression",
+    MemberExpression = "MemberExpression",
+    CallExpression = "CallExpression",
     Statement = "Statement",
+    Property = "Property",
+    ObjectLiteral = "ObjectLiteral",
     
   }
 
-  export interface AssignmentExpressionNode extends AstNode {
+  export interface AssignmentExpressionNode extends ExpressionNode {
     type: AstNodeType.AssignmentExpression,
-    assigne:AstNode,
-    value:AstNode,
+    assigne:ExpressionNode,
+    value:ExpressionNode,
   }
 
   export interface StatementNode extends AstNode {
@@ -29,24 +35,51 @@ export enum AstNodeType {
     body: AstNode[];
   }
   
-  export interface BinaryExpressionNode extends AstNode {
+  export interface BinaryExpressionNode extends ExpressionNode {
     type: AstNodeType.BinaryExpression;
     operator: string;
-    left: AstNode;
-    right: AstNode;
+    left: ExpressionNode;
+    right: ExpressionNode;
+  } 
+
+  export interface CallExpressionNode extends ExpressionNode {
+    type: AstNodeType.CallExpression;
+    params: ExpressionNode[];
+    caller: ExpressionNode;
+    
   }
-  
-  export interface IdentifierNode extends AstNode {
+  export interface ExpressionNode extends AstNode {}
+
+  export interface MemberExpressionNode extends ExpressionNode {
+    type: AstNodeType.MemberExpression;
+    object: ExpressionNode;
+    property: ExpressionNode;
+    isComputed: boolean;
+    
+  }
+
+  export interface PropertyNode extends ExpressionNode {
+    type: AstNodeType.Property;
+    key:string;
+    value?:AstNode
+  }
+  export interface ObjectLiteralNode extends ExpressionNode {
+    type: AstNodeType.ObjectLiteral;
+    properties:PropertyNode[];
+    
+  }
+
+  export interface IdentifierNode extends ExpressionNode {
     type: AstNodeType.Identifier;
     name: string;
   }
   
-  export interface NumericLiteralNode extends AstNode {
+  export interface NumericLiteralNode extends ExpressionNode {
     type: AstNodeType.NumericLiteral;
     value: number;
   }
 
-  export interface NullLiteralNode extends AstNode {
+  export interface NullLiteralNode extends ExpressionNode {
     type: AstNodeType.NullLiteral;
     value: "निर्गुण";
   }
@@ -55,6 +88,6 @@ export enum AstNodeType {
     type: AstNodeType.VariableDeclaration;
     isConstant: boolean;
     name: string;
-    value?: AstNode;
+    value?: ExpressionNode;
   }
   
