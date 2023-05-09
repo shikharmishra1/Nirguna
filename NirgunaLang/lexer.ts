@@ -7,6 +7,10 @@ export enum Ttoken
     Equals="Equals",
     Comma="Comma",
     OpenParanthesis="OpenParanthesis", CloseParanthesis="CloseParanthesis",
+    OpenBrace="OpenBrace", CloseBrace="CloseBrace",
+    OpenBracket="OpenBracket", CloseBracket="CloseBracket",
+    Colon="Colon",
+
     BinaryOperator="BinaryOperator",
     Number="Number",
     EndOfFile="EndOfFile",
@@ -14,6 +18,7 @@ export enum Ttoken
 
     //operators
     ConditionalOperator="Conditional Operator",
+    DotOperator="Dot Operator",
 
     //keywords
     Constant="Constant",
@@ -88,6 +93,7 @@ export function* tokenize(inputCode:string):Generator<Token> {
     while (src.length > 0) {
       const uwu = convertHindiToStandardDigits(src[0]);
       
+      //skips the whole line
       if (skipLine) {
         if (src[0] === "\n") {
           skipLine = false;
@@ -96,6 +102,7 @@ export function* tokenize(inputCode:string):Generator<Token> {
         continue;
       }
       
+      //skips whe encountered # token
       if (src[0] === "#") {
         skipLine = true;
         src.shift();
@@ -106,10 +113,16 @@ export function* tokenize(inputCode:string):Generator<Token> {
         yield token(src.shift(), Ttoken.OpenParanthesis);
       } else if (src[0] === ")") {
         yield token(src.shift(), Ttoken.CloseParanthesis);
+      } else if (src[0] === "{") {
+        yield token(src.shift(), Ttoken.OpenBrace);
+      } else if (src[0] === "}") {
+        yield token(src.shift(), Ttoken.CloseBrace);
       } else if (["+","-","*","/","%"].includes(src[0])) {
         yield token(src.shift(), Ttoken.BinaryOperator);
       } else if (["<","<=",">=","==",">"].includes(src[0])) {
         yield token(src.shift(), Ttoken.ConditionalOperator);
+      } else if (src[0] === ".") {
+        yield token(src.shift(), Ttoken.DotOperator);
       }
       
       else if (src[0] === "।") {
@@ -121,6 +134,12 @@ export function* tokenize(inputCode:string):Generator<Token> {
       } 
        else if(src[0]===','){
         yield token(src.shift(), Ttoken.Comma);
+      } else if(src[0]===':'){
+        yield token(src.shift(), Ttoken.Colon);
+      } else if(src[0]==='['){
+        yield token(src.shift(), Ttoken.OpenBracket);
+      } else if(src[0]===']'){
+        yield token(src.shift(), Ttoken.CloseBracket);
       }
        
       //handles identifiers and keywords
