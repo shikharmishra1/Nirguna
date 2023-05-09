@@ -1,5 +1,5 @@
-import { NullValueNode, NumericValueNode, ObjectValueNode, ValueNode, ValueNodeType} from "./values";
-import {AstNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode, ObjectLiteralNode} from "../AST"
+import { FunctionValueNode, MK_NULL, NativeFunctionNode, NullValueNode, NumericValueNode, ObjectValueNode, ValueNode, ValueNodeType} from "./values";
+import {AstNode, FunctionDeclarationNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode, ObjectLiteralNode, CallExpressionNode} from "../AST"
 import Environment from "./environment";
 
 export function evaluate(astNode:AstNode, env:Environment) : ValueNode
@@ -28,6 +28,8 @@ export function evaluate(astNode:AstNode, env:Environment) : ValueNode
         case AstNodeType.VariableDeclaration:
             return evaluateVariableDeclaration(astNode as VariableDeclarationNode, env)
 
+        case AstNodeType.FunctionDeclaration:
+            return evaluateFunctionDeclaration(astNode as FunctionDeclarationNode, env)
 
         case AstNodeType.Program:
             return evaluateProgram(astNode as ProgramNode, env);
@@ -37,11 +39,14 @@ export function evaluate(astNode:AstNode, env:Environment) : ValueNode
 
         case AstNodeType.ObjectLiteral:
             return evaluateObjectExpression(astNode as ObjectLiteralNode, env);
+        
+        case AstNodeType.CallExpression:
+            return evaluateCallExpression(astNode as CallExpressionNode, env);
 
         
         
         default:
-            throw "can not interpret this node "+JSON.stringify(astNode)+"";
+            throw `can not interpret this node\n ${JSON.stringify(astNode, null, 2)} `;
     }
             
     
@@ -133,4 +138,51 @@ export function evaluateObjectExpression(obj: ObjectLiteralNode, env: Environmen
     }
     return object;
 } 
+
+export function evaluateCallExpression(expression: CallExpressionNode, env: Environment) : ValueNode
+{
+    const params:ValueNode[] = expression.params.map(param => evaluate(param, env));
+    const fxn = evaluate(expression.caller, env);
+    if(fxn.type == ValueNodeType.NativeFunctions)
+    {
+        let result = (fxn as NativeFunctionNode).call(params, env);
+        return result;
+        
+    } 
+    if(fxn.type == ValueNodeType.FunctionDeclaration)
+    {
+        const fn = fxn as FunctionValueNode;
+        const scope = new Environment(fn.declarationEnvironment);
+        for(let i=0; i<fn.params.length; i++)
+        {
+            scope.declare(fn.params[i], params[i], true);
+        }
+        let result:ValueNode = MK_NULL();
+        for(const statement of fn.body)
+        {
+            result = evaluate(statement, scope);
+        }
+        return result;
+
+    }
+    console.log(fxn.type);
+    throw "गैर-कर्म मान को बुला नहीं सकते"+JSON.stringify(fxn);
+    
+} 
+
+
+
+
+function evaluateFunctionDeclaration(declaration: FunctionDeclarationNode, env: Environment): ValueNode {
+    const fxn = 
+    {
+        type:ValueNodeType.FunctionDeclaration,
+        name:declaration.name,
+        params:declaration.parameters,
+        body:declaration.body,
+        declarationEnvironment:env
+    } as FunctionValueNode
+
+    return env.declare(declaration.name, fxn, true)
+}
 

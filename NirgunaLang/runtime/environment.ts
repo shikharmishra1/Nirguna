@@ -1,5 +1,20 @@
 import { ok } from 'assert';
-import {ValueNode} from './values'
+import {MK_BOOL, MK_NULL, MK_Native_FN, ValueNode} from './values'
+
+export function createGlobalScope()
+    {
+        const env = new Environment();
+        env.declare("सत्य", MK_BOOL(true), true);
+        env.declare("असत्य", MK_BOOL(true), false);
+
+        //define native functions
+        env.declare("लेख", MK_Native_FN((params, scope)=>
+        {   
+            console.log(...params);
+            return MK_NULL();
+        }), true);
+        return env
+    }
 
 export default class Environment{
     private parent?:Environment;
@@ -8,10 +23,14 @@ export default class Environment{
 
     constructor(parentEnv?:Environment)
     {
+        const global = parentEnv? true:false;
         this.parent = parentEnv;
         this.variables = new Map();
         this.constants = new Set();
+        
     }
+
+    
 
     //declares variable
     public declare(name:string, value:ValueNode, isConstant:boolean): ValueNode
@@ -29,6 +48,11 @@ export default class Environment{
     public assign(name:string, value:ValueNode):ValueNode
     {
         const env = this.resolve(name);
+
+        //can't assign to a constant
+        if(this.constants.has(name))
+            throw "नित्य मान "+{name}+" को पुनर्नियत नहीं किया जा सकता"
+
         env.variables.set(name, value);
         return value
     }
@@ -43,7 +67,7 @@ export default class Environment{
         
         //no parent? then the var doesn't exist
         if (this.parent == undefined) {
-            throw ''+{name}+'मौजूद नहीं है इसलिए उसे संकलित नहीं किया जा सकता।';
+            throw `${name} मौजूद नहीं है इसलिए उसे संकलित नहीं किया जा सकता।`;
         }
 
         //parent exists? resolve that recursively 

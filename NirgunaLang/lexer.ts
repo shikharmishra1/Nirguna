@@ -24,6 +24,7 @@ export enum Ttoken
     Constant="Constant",
     Variable="Variable",
     Null="Null",
+    Function="Function",
     
 
 
@@ -60,6 +61,7 @@ const KEYWORDS:Record<string, Ttoken> = {
     मान:Ttoken.Variable,
     निर्गुण:Ttoken.Null,
     नित्य:Ttoken.Constant,
+    कर्म:Ttoken.Function,
 }
 
 

@@ -13,7 +13,8 @@ export enum AstNodeType {
     Statement = "Statement",
     Property = "Property",
     ObjectLiteral = "ObjectLiteral",
-    
+    FunctionDeclaration = "FunctionDeclaration",
+    Block="Block"
   }
 
   export interface AssignmentExpressionNode extends ExpressionNode {
@@ -28,6 +29,22 @@ export enum AstNodeType {
   }
   export interface AstNode {
     type: AstNodeType;
+  }
+
+
+
+  export interface FunctionDeclarationNode extends AstNode {
+    type: AstNodeType.FunctionDeclaration;
+    parameters: string[];
+    name:string;
+    body: AstNode[];
+  }
+
+  export interface BlockNode extends AstNode {
+    type: AstNodeType.Block;
+    //parameters: string[];
+    //name:string;
+    body: AstNode[];
   }
   
   export interface ProgramNode extends AstNode {

@@ -15,6 +15,7 @@ import {
   PropertyNode,
   ObjectLiteralNode,
   ExpressionNode,
+  FunctionDeclarationNode,
 } from "./AST";
 
 export function parse(inputCode: string): AstNode {
@@ -57,12 +58,14 @@ export function parse(inputCode: string): AstNode {
          case Ttoken.Variable:
          case Ttoken.Constant: 
           return parseVariableDeclaration();
+         case Ttoken.Function:
+          return parseFunctionDeclaration();
       }
     }
 
-    function parseExpression(str?:String):ExpressionNode
+    function parseExpression():ExpressionNode
     {
-      console.log(str)
+      
       //return the expression lowest in the precedence
       return parseAsignmentExpression();
       
@@ -130,6 +133,9 @@ export function parse(inputCode: string): AstNode {
               ); // closing paren
               return value;
             }
+
+            
+
             case Ttoken.Null:
               advance(); // advance the null token
               
@@ -342,6 +348,7 @@ export function parse(inputCode: string): AstNode {
           isConstant:false,
          } as VariableDeclarationNode;
       }
+
       
 
       //type: मान एक = १ ।
@@ -357,7 +364,33 @@ export function parse(inputCode: string): AstNode {
       expect(Ttoken.PurnaViraam, "मान की घोषणा के बाद पूर्णविराम (।) की अपेक्षा है। जैसे कि: मान एक = १ ।")
       return declaration
     }
-  
+    function parseFunctionDeclaration(): AstNode
+      {
+        advance(); //skips प्रगट keyword
+        const name = expect(Ttoken.Identifier, "कर्म शब्द के बाद कर्म के नाम की अपेछा थी ").value
+
+        const args = parseParams();
+        const params:string[] = [];
+        for(const arg of args)
+        {
+          if(arg.type !== AstNodeType.Identifier)
+            throw "मापक श्रृंखला के प्रकार के होने चाहिए। जैसे कि: कर्म जोड़(एक,दो) ।"+arg
+          params.push((arg as IdentifierNode).name)
+        }
+        const body = parseBlockExpression()
+        const fxn = {body:body, name:name, parameters:params, type:AstNodeType.FunctionDeclaration} as FunctionDeclarationNode
+        return fxn
+
+      }
+      function parseBlockExpression(): AstNode[]
+      {
+        expect(Ttoken.OpenBrace, "{ की अपेछा थी");
+        const body: AstNode[] = []
+        while(tokens[0].type !== Ttoken.CloseBrace && tokens[0].type !== Ttoken.EndOfFile)
+            body.push(parseStatement())
+        expect(Ttoken.CloseBrace, "} की अपेछा थी");
+        return body
+      }
 }
 
 

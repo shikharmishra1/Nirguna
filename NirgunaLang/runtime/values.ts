@@ -1,3 +1,6 @@
+import { AstNode } from "../AST";
+import Environment from "./environment";
+
 export enum ValueNodeType {
     BinaryExpression = "BinaryExpression",
     Identifier = "Identifier",
@@ -9,6 +12,7 @@ export enum ValueNodeType {
     ObjectLiteral = "ObjectLiteral",
     BooleanLiteral = "BooleanLiteral",
     StringLiteral = "StringLiteral",
+    NativeFunctions = "NativeFunctions",
     
   }
   
@@ -26,12 +30,7 @@ export enum ValueNodeType {
     value: string;
   }
   
-  export interface FunctionDeclarationNode extends ValueNode {
-    type: ValueNodeType.FunctionDeclaration;
-    name: string;
-    params: string[];
-    body: ValueNode[];
-  }
+ 
   
   export interface ObjectLiteralNode extends ValueNode {
     type: ValueNodeType.ObjectLiteral;
@@ -65,6 +64,35 @@ export enum ValueNodeType {
           value: num
       } as NumericValueNode;
   }
+
+  export interface StringValueNode extends ValueNode {
+
+  }
+
+  export type FunctionCall = (params:ValueNode[], env:Environment) => ValueNode;
+
+  export interface NativeFunctionNode extends ValueNode {
+    type: ValueNodeType.NativeFunctions;
+    call: FunctionCall;
+  }
+
+  export interface FunctionValueNode extends ValueNode
+  {
+    type:ValueNodeType.FunctionDeclaration
+    name:String
+    params:string[]
+    body:AstNode[]
+    declarationEnvironment:Environment
+  }
+  export interface BlockValueNode extends ValueNode
+  {
+    type:ValueNodeType.FunctionDeclaration
+    name:String
+    body:AstNode[]
+    declarationEnvironment:Environment
+  }
+
+
   export function MK_BOOL(bool:boolean):BooleanValueNode
   {
       return {
@@ -72,11 +100,18 @@ export enum ValueNodeType {
           value:bool
       } as BooleanValueNode;
   }
-  export function MK_NULL(str:boolean):NullValueNode
+  export function MK_NULL(str?:boolean):NullValueNode
   {
       return {
           type: ValueNodeType.NullLiteral,
           value:"निर्गुण"
       } as NullValueNode;
+  }
+  export function MK_Native_FN(call:FunctionCall):NativeFunctionNode
+  {
+      return {
+          type: ValueNodeType.NativeFunctions,
+          call:call
+      } as NativeFunctionNode;
   }
   
