@@ -9,6 +9,7 @@ export enum ValueNodeType {
     ObjectLiteral = "ObjectLiteral",
     BooleanLiteral = "BooleanLiteral",
     StringLiteral = "StringLiteral",
+    
   }
   
   export interface ValueNode {
@@ -44,6 +45,16 @@ export enum ValueNodeType {
   
   export interface StringLiteralNode extends ValueNode {
     type: ValueNodeType.StringLiteral;
+    value: string;
+  }
+
+  export interface ObjectValueNode extends ValueNode {
+    type: ValueNodeType.ObjectLiteral;
+    properties:Map<string,ValueNode>;
+  }
+  
+  export interface NullValueNode extends ValueNode {
+    type: ValueNodeType.NullLiteral;
     value: string;
   }
 

@@ -10,6 +10,11 @@ import {
   VariableDeclarationNode,
   StatementNode,
   AssignmentExpressionNode,
+  CallExpressionNode,
+  MemberExpressionNode,
+  PropertyNode,
+  ObjectLiteralNode,
+  ExpressionNode,
 } from "./AST";
 
 export function parse(inputCode: string): AstNode {
@@ -55,12 +60,14 @@ export function parse(inputCode: string): AstNode {
       }
     }
 
-    function parseExpression():AstNode
+    function parseExpression(str?:String):ExpressionNode
     {
+      console.log(str)
       //return the expression lowest in the precedence
       return parseAsignmentExpression();
+      
     }
-    function parseAdditiveExpression():AstNode
+    function parseAdditiveExpression():ExpressionNode
     {
         //
         let left = parseMultiplicativeExpression();
@@ -77,13 +84,15 @@ export function parse(inputCode: string): AstNode {
         }
         return left;
     }
-    function parseMultiplicativeExpression():AstNode
+    function parseMultiplicativeExpression():ExpressionNode
     {
-        let left = parsePrimaryExpression();
-        while(tokens[0].value=="*"||tokens[0].value=="/"||tokens[0].value=="%")
+        //parse the expression with the highest precedence
+        let left = parseCallMemberExpression();
+        
+        while(tokens[0].value=="*" || tokens[0].value=="/" || tokens[0].value=="%")
         {
             const operator = advance().value;
-            const right = parsePrimaryExpression();
+            const right = parseCallMemberExpression();
             left = {
                 type: AstNodeType.BinaryExpression,
                 operator:operator,
@@ -94,7 +103,7 @@ export function parse(inputCode: string): AstNode {
         return left;
     }
     
-    function parsePrimaryExpression():AstNode
+    function parsePrimaryExpression():ExpressionNode
     {
         const token = tokens[0].type;
 
@@ -116,18 +125,24 @@ export function parse(inputCode: string): AstNode {
               const value = parseExpression();
               expect(
                 Ttoken.CloseParanthesis,
+                
                 "Unexpected token found inside parenthesized expression. Expected closing parenthesis.",
               ); // closing paren
               return value;
             }
             case Ttoken.Null:
               advance(); // advance the null token
-              console.log("Null Literal Found")
+              
               return {
                 type: AstNodeType.NullLiteral,
                 value:  "निर्गुण",
               } as NullLiteralNode;
-        
+
+              
+              
+              
+                
+              
             // Unidentified Tokens and Invalid Code Reached
             default:
               throw new Error("Unexpected token found during parsing!"+ [tokens[0].type, tokens[0].value]);
@@ -145,19 +160,167 @@ export function parse(inputCode: string): AstNode {
         body,
      } as ProgramNode;
 
-     function parseAsignmentExpression(): AstNode {
+     function parseAsignmentExpression(): ExpressionNode {
         
-      const left = parseAdditiveExpression();
-
+      const left = parseObjectExpression();
+      
       if(tokens[0].type == Ttoken.Equals)
       {
         advance(); //advance past equal token
+        
         const value = parseAsignmentExpression()
         return {value:value, assigne:left, type:AstNodeType.AssignmentExpression} as AssignmentExpressionNode
 
       }
       
         return left;
+    }
+    function parseObjectExpression():ExpressionNode
+    {
+      if(tokens[0].type !== Ttoken.OpenBrace)
+      {
+        return parseAdditiveExpression();
+      }
+        advance() //advance past open brace
+        
+        const properties = new Array<PropertyNode>();
+        // eslint-disable-next-line
+        while(notEOF() && tokens.at(0)?.type !==Ttoken.CloseBrace)
+        {
+          
+          const key = expect(Ttoken.Identifier, "विशेषण की अपेक्षा थी");
+          let token = tokens[0]
+          
+          //allows obj = {key,}
+          if(token.type === Ttoken.Comma)
+          {
+            advance() //advance past comma
+            
+            properties.push({key:key.value, type:AstNodeType.Property} as PropertyNode)
+            continue;
+          } 
+          //allows obj = {key}
+          else if(token.type === Ttoken.CloseBrace)
+            {
+              advance() //advance past comma
+              
+              properties.push({key:key.value, type:AstNodeType.Property} as PropertyNode)
+              continue;
+            }
+
+          //allows {key1:val}
+
+          expect(Ttoken.Colon, ", की अपेक्षा थी");
+          const value = parseExpression();
+          properties.push({key:key.value, value:value, type:AstNodeType.Property} as PropertyNode)
+          if(tokens.at(0)?.type !== Ttoken.CloseBrace)
+          {
+            expect(Ttoken.Comma, ", की अपेक्षा थी");
+
+          }
+          
+        }
+        expect(Ttoken.CloseBrace, "} की अपेक्षा थी");
+        return { 
+          type:AstNodeType.ObjectLiteral,
+          properties:properties,
+         } as ObjectLiteralNode
+        
+      }
+    //type:foo.x()
+    function parseCallMemberExpression():ExpressionNode {
+      const member = parseMemberExpression()
+      
+      if(tokens[0].type == Ttoken.OpenParanthesis)
+      {
+        return parseCallExpression(member);
+      }
+      return member
+    }
+
+    function parseCallExpression(caller:AstNode):ExpressionNode
+    {
+      let expression:AstNode = {
+
+        type:AstNodeType.CallExpression,
+        caller:caller,
+        params:parseParams(),
+
+      } as CallExpressionNode   
+
+      //this allows chaining of calls like foo.x()()
+      if(tokens[0].type==Ttoken.OpenParanthesis)
+      {
+        
+        expression = parseCallExpression(expression)  
+      }
+
+      return expression;
+    }
+
+    function parseMemberExpression():ExpressionNode
+    {
+      let object = parsePrimaryExpression();
+      
+      while( tokens[0].type == Ttoken.DotOperator || tokens[0].type == Ttoken.OpenBracket)
+      {
+        const operator = advance();
+        let property:ExpressionNode;
+        let isComputed:boolean; 
+
+        //for dot operator (non-computed values)
+        if(operator.type == Ttoken.DotOperator)
+        { 
+          
+          isComputed = false;
+          property = parsePrimaryExpression();
+          console.log(property)
+          if(property.type!== AstNodeType.Identifier)
+          {
+            throw 'डॉट संचालक (.) के बाद पहचानकर्ता की अपेक्षा थी।'
+          }
+        }
+          //allows obj[computed Value]
+          else{
+            
+            isComputed = true;
+            
+            property = parseExpression();
+            
+            expect(Ttoken.CloseBracket, "] की अपेक्षा थी।")
+            
+          }
+          object = {
+          type:AstNodeType.MemberExpression,
+          object:object,
+          property:property,
+         } as MemberExpressionNode
+        
+        
+      }
+     
+      return object
+       
+    }
+
+
+    function parseParamsList():ExpressionNode[]
+    {
+      const params = [parseAsignmentExpression()]
+      while(tokens[0].type == Ttoken.Comma && advance())
+      {
+        params.push(parseAsignmentExpression())
+      }
+      return params
+    }
+
+    function parseParams():ExpressionNode[]
+    {
+        expect(Ttoken.OpenParanthesis, "( की अपेक्षा है।")
+        const params = tokens[0].type == Ttoken.CloseParanthesis ? [] : parseParamsList();
+
+        expect(Ttoken.CloseParanthesis, ") की अपेक्षा है।")
+        return params
     }
 
      function parseVariableDeclaration(): AstNode {
@@ -179,6 +342,7 @@ export function parse(inputCode: string): AstNode {
           isConstant:false,
          } as VariableDeclarationNode;
       }
+      
 
       //type: मान एक = १ ।
       expect(Ttoken.Equals, "मान की घोषणा के बाद एक मान की अपेक्षा है। जैसे कि: मान एक = १ ।");
@@ -195,6 +359,8 @@ export function parse(inputCode: string): AstNode {
     }
   
 }
+
+
 
 
 
