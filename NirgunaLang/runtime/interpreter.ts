@@ -169,7 +169,7 @@ export function evaluateCallExpression(expression: CallExpressionNode, env: Envi
 
     }
     
-    console.log(fxn.type);
+    
     throw "गैर-कर्म मान को बुला नहीं सकते"+JSON.stringify(fxn);
     
 } 
@@ -192,12 +192,13 @@ function evaluateFunctionDeclaration(declaration: FunctionDeclarationNode, env: 
 
 function evaluateBlockStatement(block: BlockNode, env: Environment): ValueNode {
 
-    const newblock = 
+    const scope = new Environment(env);
+    let lastStatement:ValueNode = MK_NULL();
+    for(const statement of block.body)
     {
-        type:ValueNodeType.Block,
-        body:block.body,
-        declarationEnvironment:env
-    } as BlockValueNode
-    return env.declare("block", newblock, true)
+        lastStatement = evaluate(statement, scope);
+    }
+    return lastStatement;
+
 }
 

@@ -15,7 +15,7 @@ function run2 (file:string)
   const program = parse(input);
   //console.log(JSON.stringify(program, null, 2))
   const result = evaluate(program, env);
-  //console.log(result);
+  
 }
 
 function run() {
