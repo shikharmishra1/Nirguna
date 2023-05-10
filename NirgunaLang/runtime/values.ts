@@ -13,6 +13,7 @@ export enum ValueNodeType {
     BooleanLiteral = "BooleanLiteral",
     StringLiteral = "StringLiteral",
     NativeFunctions = "NativeFunctions",
+    Block = "Block",
     
   }
   
@@ -84,10 +85,12 @@ export enum ValueNodeType {
     body:AstNode[]
     declarationEnvironment:Environment
   }
+
+
+
   export interface BlockValueNode extends ValueNode
   {
-    type:ValueNodeType.FunctionDeclaration
-    name:String
+    type:ValueNodeType.Block
     body:AstNode[]
     declarationEnvironment:Environment
   }

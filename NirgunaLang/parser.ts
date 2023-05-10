@@ -16,6 +16,7 @@ import {
   ObjectLiteralNode,
   ExpressionNode,
   FunctionDeclarationNode,
+  BlockNode,
 } from "./AST";
 
 export function parse(inputCode: string): AstNode {
@@ -60,6 +61,9 @@ export function parse(inputCode: string): AstNode {
           return parseVariableDeclaration();
          case Ttoken.Function:
           return parseFunctionDeclaration();
+         case Ttoken.OpenBrace:
+          console.log(tokens[0]);
+          return parseTestBlockExpression();
       }
     }
 
@@ -172,6 +176,7 @@ export function parse(inputCode: string): AstNode {
       
       if(tokens[0].type == Ttoken.Equals)
       {
+        console.log(tokens[0])
         advance(); //advance past equal token
         
         const value = parseAsignmentExpression()
@@ -390,6 +395,18 @@ export function parse(inputCode: string): AstNode {
             body.push(parseStatement())
         expect(Ttoken.CloseBrace, "} की अपेछा थी");
         return body
+      }
+      function parseTestBlockExpression(): AstNode
+      {
+       advance(); //
+        
+        const body: AstNode[] = []
+        while(tokens.at(0)?.type !== Ttoken.CloseBrace && tokens.at(0)?.type !== Ttoken.EndOfFile)
+            body.push(parseStatement())
+        expect(Ttoken.CloseBrace, "} की अपेछा थी");
+        return {body:body, type:AstNodeType.Block} as BlockNode
+        
+        //return parseAsignmentExpression()
       }
 }
 

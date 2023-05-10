@@ -1,5 +1,5 @@
-import { FunctionValueNode, MK_NULL, NativeFunctionNode, NullValueNode, NumericValueNode, ObjectValueNode, ValueNode, ValueNodeType} from "./values";
-import {AstNode, FunctionDeclarationNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode, ObjectLiteralNode, CallExpressionNode} from "../AST"
+import { BlockValueNode, FunctionValueNode, MK_NULL, NativeFunctionNode, NullValueNode, NumericValueNode, ObjectValueNode, ValueNode, ValueNodeType} from "./values";
+import {AstNode, FunctionDeclarationNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode, ObjectLiteralNode, CallExpressionNode, BlockNode} from "../AST"
 import Environment from "./environment";
 
 export function evaluate(astNode:AstNode, env:Environment) : ValueNode
@@ -30,6 +30,9 @@ export function evaluate(astNode:AstNode, env:Environment) : ValueNode
 
         case AstNodeType.FunctionDeclaration:
             return evaluateFunctionDeclaration(astNode as FunctionDeclarationNode, env)
+        
+        case AstNodeType.Block:
+            return evaluateBlockStatement(astNode as BlockNode, env)
 
         case AstNodeType.Program:
             return evaluateProgram(astNode as ProgramNode, env);
@@ -165,6 +168,7 @@ export function evaluateCallExpression(expression: CallExpressionNode, env: Envi
         return result;
 
     }
+    
     console.log(fxn.type);
     throw "गैर-कर्म मान को बुला नहीं सकते"+JSON.stringify(fxn);
     
@@ -184,5 +188,16 @@ function evaluateFunctionDeclaration(declaration: FunctionDeclarationNode, env: 
     } as FunctionValueNode
 
     return env.declare(declaration.name, fxn, true)
+}
+
+function evaluateBlockStatement(block: BlockNode, env: Environment): ValueNode {
+
+    const newblock = 
+    {
+        type:ValueNodeType.Block,
+        body:block.body,
+        declarationEnvironment:env
+    } as BlockValueNode
+    return env.declare("block", newblock, true)
 }
 
