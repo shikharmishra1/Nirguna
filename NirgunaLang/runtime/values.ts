@@ -1,4 +1,4 @@
-import { AstNode } from "../AST";
+import { AstNode, BlockNode } from "../AST";
 import Environment from "./environment";
 
 export enum ValueNodeType {
@@ -82,7 +82,7 @@ export enum ValueNodeType {
     type:ValueNodeType.FunctionDeclaration
     name:String
     params:string[]
-    body:AstNode[]
+    body:BlockNode
     declarationEnvironment:Environment
   }
 
@@ -112,6 +112,7 @@ export enum ValueNodeType {
   }
   export function MK_Native_FN(call:FunctionCall):NativeFunctionNode
   {
+    
       return {
           type: ValueNodeType.NativeFunctions,
           call:call

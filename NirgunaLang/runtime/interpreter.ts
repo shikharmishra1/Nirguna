@@ -156,16 +156,15 @@ export function evaluateCallExpression(expression: CallExpressionNode, env: Envi
     {
         const fn = fxn as FunctionValueNode;
         const scope = new Environment(fn.declarationEnvironment);
+
+        
         for(let i=0; i<fn.params.length; i++)
         {
             scope.declare(fn.params[i], params[i], true);
         }
-        let result:ValueNode = MK_NULL();
-        for(const statement of fn.body)
-        {
-            result = evaluate(statement, scope);
-        }
-        return result;
+        
+        return evaluateBlockStatement(fn.body, scope);
+        
 
     }
     

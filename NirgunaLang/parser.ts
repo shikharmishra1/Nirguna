@@ -62,8 +62,8 @@ export function parse(inputCode: string): AstNode {
          case Ttoken.Function:
           return parseFunctionDeclaration();
          case Ttoken.OpenBrace:
-          console.log(tokens[0]);
-          return parseTestBlockExpression();
+          
+          return parseBlockExpression();
       }
     }
 
@@ -176,7 +176,7 @@ export function parse(inputCode: string): AstNode {
       
       if(tokens[0].type == Ttoken.Equals)
       {
-        console.log(tokens[0])
+        
         advance(); //advance past equal token
         
         const value = parseAsignmentExpression()
@@ -285,7 +285,6 @@ export function parse(inputCode: string): AstNode {
           
           isComputed = false;
           property = parsePrimaryExpression();
-          console.log(property)
           if(property.type!== AstNodeType.Identifier)
           {
             throw 'डॉट संचालक (.) के बाद पहचानकर्ता की अपेक्षा थी।'
@@ -387,19 +386,13 @@ export function parse(inputCode: string): AstNode {
         return fxn
 
       }
-      function parseBlockExpression(): AstNode[]
-      {
-        expect(Ttoken.OpenBrace, "{ की अपेछा थी");
-        const body: AstNode[] = []
-        while(tokens[0].type !== Ttoken.CloseBrace && tokens[0].type !== Ttoken.EndOfFile)
-            body.push(parseStatement())
-        expect(Ttoken.CloseBrace, "} की अपेछा थी");
-        return body
-      }
-      function parseTestBlockExpression(): AstNode
-      {
-       advance(); //
-        
+      
+      function parseBlockExpression(): AstNode
+      { 
+        if(tokens[0].type == Ttoken.OpenBrace)
+          advance(); 
+        else
+          expect(Ttoken.OpenBrace, "{ की अपेछा थी");
         const body: AstNode[] = []
         while(tokens.at(0)?.type !== Ttoken.CloseBrace && tokens.at(0)?.type !== Ttoken.EndOfFile)
             body.push(parseStatement())

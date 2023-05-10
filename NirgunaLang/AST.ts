@@ -37,7 +37,7 @@ export enum AstNodeType {
     type: AstNodeType.FunctionDeclaration;
     parameters: string[];
     name:string;
-    body: AstNode[];
+    body: BlockNode;
   }
 
   export interface BlockNode extends AstNode {
