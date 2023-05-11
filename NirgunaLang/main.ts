@@ -13,7 +13,7 @@ function run2 (file:string)
   const input =  fs.readFileSync(file, 'utf-8');
 
   const program = parse(input);
-  //console.log(JSON.stringify(program, null, 2))
+  console.log(JSON.stringify(program, null, 2))
   const result = evaluate(program, env);
   
 }

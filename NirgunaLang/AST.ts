@@ -14,7 +14,8 @@ export enum AstNodeType {
     Property = "Property",
     ObjectLiteral = "ObjectLiteral",
     FunctionDeclaration = "FunctionDeclaration",
-    Block="Block"
+    Block="Block",
+    ConditionalExpression="ConditionalExpression"
   }
 
   export interface AssignmentExpressionNode extends ExpressionNode {
@@ -45,6 +46,8 @@ export enum AstNodeType {
     //parameters: string[];
     //name:string;
     body: AstNode[];
+    context?:String;
+    hasContinue?:boolean;
   }
   
   export interface ProgramNode extends AstNode {

@@ -25,6 +25,8 @@ export enum ValueNodeType {
     type: ValueNodeType.NumericLiteral;
     value: number;
   }
+
+ 
   
   export interface NullValueNode extends ValueNode {
     type: ValueNodeType.NullLiteral;
@@ -92,6 +94,7 @@ export enum ValueNodeType {
   {
     type:ValueNodeType.Block
     body:AstNode[]
+    hasContinue?:boolean
     declarationEnvironment:Environment
   }
 

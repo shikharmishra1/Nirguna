@@ -1,33 +1,42 @@
 
 //type of token
-export enum Ttoken
-{
-    
-    Identifier="Identifier",
-    Equals="Equals",
-    Comma="Comma",
-    OpenParanthesis="OpenParanthesis", CloseParanthesis="CloseParanthesis",
-    OpenBrace="OpenBrace", CloseBrace="CloseBrace",
-    OpenBracket="OpenBracket", CloseBracket="CloseBracket",
-    Colon="Colon",
+export enum Ttoken {
 
-    BinaryOperator="BinaryOperator",
-    Number="Number",
-    EndOfFile="EndOfFile",
-    PurnaViraam="PurnaViraam",
+  Identifier = "Identifier",
+  Equals = "Equals",
+  Comma = "Comma",
+  OpenParanthesis = "OpenParanthesis", CloseParanthesis = "CloseParanthesis",
+  OpenBrace = "OpenBrace", CloseBrace = "CloseBrace",
+  OpenBracket = "OpenBracket", CloseBracket = "CloseBracket",
+  Colon = "Colon",
 
-    //operators
-    ConditionalOperator="Conditional Operator",
-    DotOperator="Dot Operator",
+  BinaryOperator = "BinaryOperator",
+  Number = "Number",
+  EndOfFile = "EndOfFile",
+  PurnaViraam = "PurnaViraam",
 
-    //keywords
-    Constant="Constant",
-    Variable="Variable",
-    Null="Null",
-    Function="Function",
-    
+  //operators
+  ConditionalOperator = "Conditional Operator",
+  DotOperator = "Dot Operator",
+  AndOperator = "AndOperator",
+  OrOperator = "OrOperator",
 
 
+  //keywords
+  Constant = "Constant",
+  Variable = "Variable",
+  Null = "Null",
+  Function = "Function",
+
+  //Block control 
+  Return = "Return",
+  Continue = "Continue",
+  Break = "Continue",
+  
+
+  //Conditional Statements
+  IfStmt = "If",
+  ElseStmt = "ElseStmt"
 }
 
 const hindiToStandardDigits: { [key: string]: string } = {
@@ -62,6 +71,15 @@ const KEYWORDS:Record<string, Ttoken> = {
     निर्गुण:Ttoken.Null,
     नित्य:Ttoken.Constant,
     कर्म:Ttoken.Function,
+    वापस:Ttoken.Return,
+    खंडन:Ttoken.Break,
+    चालू:Ttoken.Continue,
+
+    //conditional keywords
+    यदि:Ttoken.IfStmt,
+    अन्यथा:Ttoken.ElseStmt,
+    और:Ttoken.AndOperator,
+    या:Ttoken.OrOperator
 }
 
 

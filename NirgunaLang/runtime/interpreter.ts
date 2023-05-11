@@ -1,4 +1,4 @@
-import { BlockValueNode, FunctionValueNode, MK_NULL, NativeFunctionNode, NullValueNode, NumericValueNode, ObjectValueNode, ValueNode, ValueNodeType} from "./values";
+import { BlockValueNode, BooleanValueNode, FunctionValueNode, MK_NULL, NativeFunctionNode, NullValueNode, NumericValueNode, ObjectValueNode, ValueNode, ValueNodeType} from "./values";
 import {AstNode, FunctionDeclarationNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode, ObjectLiteralNode, CallExpressionNode, BlockNode} from "../AST"
 import Environment from "./environment";
 
@@ -77,6 +77,7 @@ function evaluateNumericBinExp(left:NumericValueNode, right:NumericValueNode, op
             case "*":
                 result=left.value*right.value;
                 break;
+            
             case "/":
                 result=left.value/right.value;
                 if(right.value==0)
@@ -87,10 +88,40 @@ function evaluateNumericBinExp(left:NumericValueNode, right:NumericValueNode, op
                 result=left.value%right.value;
                 break;
             
+            case "और":
+                result = left.value && right.value
+            case "या":
+                result = left.value || right.value
         }
         
         
         return {type:ValueNodeType.NumericLiteral,value:result }
+    }
+
+    function evaluateBooleanBinExp(left:BooleanValueNode, right:BooleanValueNode, operator: string):BooleanValueNode
+    {
+        let result:boolean = false;
+        switch(operator)
+        {
+            case '+':
+            case '-':
+            case "*":           
+            case "/":
+            case "%":
+                `सत्यत्व कार्य के समय ${operator} का प्रयोग वर्जित है । `;
+                break;
+
+            
+            case "और":
+                result = left.value && right.value
+                break;
+            case "या":
+                result = left.value || right.value
+                break;
+        }
+        
+        //console.log(result)
+        return {type:ValueNodeType.BooleanLiteral,value:result } as BooleanValueNode
     }
 
 function evaluateBinaryExpression(operation:BinaryExpressionNode, env:Environment):ValueNode
@@ -101,6 +132,11 @@ function evaluateBinaryExpression(operation:BinaryExpressionNode, env:Environmen
     if (left.type == ValueNodeType.NumericLiteral && right.type == ValueNodeType.NumericLiteral) {
         
         return evaluateNumericBinExp(left as NumericValueNode, right as NumericValueNode, operation.operator);
+    }
+
+   if (left.type == ValueNodeType.BooleanLiteral && right.type == ValueNodeType.BooleanLiteral) {
+        
+        return evaluateBooleanBinExp(left as BooleanValueNode, right as BooleanValueNode, operation.operator);
     }
     return {type:ValueNodeType.NullLiteral, value:"निर्गुण"} as NullValueNode
     
@@ -159,9 +195,7 @@ export function evaluateCallExpression(expression: CallExpressionNode, env: Envi
 
         
         for(let i=0; i<fn.params.length; i++)
-        {
             scope.declare(fn.params[i], params[i], true);
-        }
         
         return evaluateBlockStatement(fn.body, scope);
         
@@ -189,14 +223,20 @@ function evaluateFunctionDeclaration(declaration: FunctionDeclarationNode, env: 
     return env.declare(declaration.name, fxn, true)
 }
 
-function evaluateBlockStatement(block: BlockNode, env: Environment): ValueNode {
+function evaluateBlockStatement(block: BlockNode, env: Environment, context?:string): ValueNode {
 
     const scope = new Environment(env);
     let lastStatement:ValueNode = MK_NULL();
     for(const statement of block.body)
     {
+        if(block.hasContinue)
+        {
+            console.log('continue found')
+        }
+        
         lastStatement = evaluate(statement, scope);
     }
+    
     return lastStatement;
 
 }

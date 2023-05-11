@@ -5,7 +5,7 @@ export function createGlobalScope()
     {
         const env = new Environment();
         env.declare("सत्य", MK_BOOL(true), true);
-        env.declare("असत्य", MK_BOOL(true), false);
+        env.declare("असत्य", MK_BOOL(false),true);
 
         //define native functions
         env.declare("लेख", MK_Native_FN((params, scope)=>
@@ -17,7 +17,7 @@ export function createGlobalScope()
     }
 
 export default class Environment{
-    private parent?:Environment;
+    public parent?:Environment;
     private variables:Map<string, ValueNode>;
     private constants:Set<string>
 

@@ -62,7 +62,6 @@ export function parse(inputCode: string): AstNode {
          case Ttoken.Function:
           return parseFunctionDeclaration();
          case Ttoken.OpenBrace:
-          
           return parseBlockExpression();
       }
     }
@@ -74,6 +73,25 @@ export function parse(inputCode: string): AstNode {
       return parseAsignmentExpression();
       
     }
+
+    function parseConditionalExpression():ExpressionNode
+    {
+        let left = parseCallMemberExpression();
+
+        while(tokens[0].type==Ttoken.AndOperator||tokens[0].type==Ttoken.OrOperator)
+        {
+            const operator = advance().value;
+            const right = parseCallMemberExpression();
+            left = {
+                type: AstNodeType.BinaryExpression,
+                operator:operator,
+                left,
+                right,
+              } as BinaryExpressionNode;
+        }
+        return left;
+    }
+
     function parseAdditiveExpression():ExpressionNode
     {
         //
@@ -94,12 +112,12 @@ export function parse(inputCode: string): AstNode {
     function parseMultiplicativeExpression():ExpressionNode
     {
         //parse the expression with the highest precedence
-        let left = parseCallMemberExpression();
+        let left = parseConditionalExpression();
         
         while(tokens[0].value=="*" || tokens[0].value=="/" || tokens[0].value=="%")
         {
             const operator = advance().value;
-            const right = parseCallMemberExpression();
+            const right = parseConditionalExpression();
             left = {
                 type: AstNodeType.BinaryExpression,
                 operator:operator,
@@ -249,6 +267,8 @@ export function parse(inputCode: string): AstNode {
       return member
     }
 
+    
+
     function parseCallExpression(caller:AstNode):ExpressionNode
     {
       let expression:AstNode = {
@@ -381,23 +401,33 @@ export function parse(inputCode: string): AstNode {
             throw "मापक श्रृंखला के प्रकार के होने चाहिए। जैसे कि: कर्म जोड़(एक,दो) ।"+arg
           params.push((arg as IdentifierNode).name)
         }
-        const body = parseBlockExpression()
+        const body = parseBlockExpression("function")
         const fxn = {body:body, name:name, parameters:params, type:AstNodeType.FunctionDeclaration} as FunctionDeclarationNode
         return fxn
 
       }
       
-      function parseBlockExpression(): AstNode
+      //for anonymous blocks
+      function parseBlockExpression(context?:String): AstNode
       { 
+        let hasContinue = false;
         if(tokens[0].type == Ttoken.OpenBrace)
           advance(); 
         else
           expect(Ttoken.OpenBrace, "{ की अपेछा थी");
         const body: AstNode[] = []
         while(tokens.at(0)?.type !== Ttoken.CloseBrace && tokens.at(0)?.type !== Ttoken.EndOfFile)
-            body.push(parseStatement())
+        {   
+          
+          if(tokens.at(0)?.type!==Ttoken.Break && tokens.at(0)?.type!==Ttoken.Return && tokens.at(0)?.type!==Ttoken.Continue )
+              body.push(parseStatement())
+          
+          //for break statements
+            
+        }
         expect(Ttoken.CloseBrace, "} की अपेछा थी");
-        return {body:body, type:AstNodeType.Block} as BlockNode
+        console.log(context)
+        return {body:body, type:AstNodeType.Block, hasContinue:hasContinue, context:context} as BlockNode
         
         //return parseAsignmentExpression()
       }
