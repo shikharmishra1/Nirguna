@@ -17,7 +17,10 @@ import {
   ExpressionNode,
   FunctionDeclarationNode,
   BlockNode,
+  ConditionalStatementNode,
+  ElifNode,
 } from "./AST";
+import { MK_NULL } from "./runtime/values";
 
 export function parse(inputCode: string): AstNode {
     let tokens:Token[] = [...tokenize(inputCode)]
@@ -63,6 +66,9 @@ export function parse(inputCode: string): AstNode {
           return parseFunctionDeclaration();
          case Ttoken.OpenBrace:
           return parseBlockExpression();
+        case Ttoken.IfStmt:
+        case Ttoken.ElseStmt:
+          return parseConditionalStatement();
       }
     }
 
@@ -406,6 +412,60 @@ export function parse(inputCode: string): AstNode {
         return fxn
 
       }
+
+      function parseConditionalStatement(): AstNode
+      {
+          advance(); //skips if  keyword
+          expect(Ttoken.OpenParanthesis, "no( की अपेछा थी")
+          const condition = parseConditionalExpression()
+          expect(Ttoken.CloseParanthesis, ") की अपेछा थी")
+      
+          const body = parseBlockExpression("conditional")
+          if(tokens.at(0)?.type==Ttoken.ElIfStmt)
+          {
+            console.log("what")
+            let elifBody:AstNode[] =[];
+            while(tokens.at(0)?.type==Ttoken.ElIfStmt)
+            {
+              advance();
+              advance(); //skips elif
+
+              expect(Ttoken.OpenParanthesis, "( sdfsdfकी अपेछा थी")
+              const elifCondition = parseConditionalExpression()
+              expect(Ttoken.CloseParanthesis, ") की अपेछा थी")
+              const body = parseBlockExpression()
+              const elif = { body:body, condition:elifCondition,type:AstNodeType.ElifStatement } as ElifNode;
+              elifBody.push(elif)
+              if(tokens.at(0)?.type==Ttoken.ElseStmt)
+              {
+
+                advance();
+                advance();
+                const elseBody = parseBlockExpression("conditional")
+                return {body:body, elifBody:elifBody, condition:condition, elseBody:elseBody, conditionType:"if", type:AstNodeType.ConditionalStatement} as ConditionalStatementNode
+                
+              }
+            }
+
+            return {body:body, condition:condition, elifBody:elifBody ,conditionType:"if", type:AstNodeType.ConditionalStatement} as ConditionalStatementNode
+          }
+          
+
+           if(tokens.at(0)?.type==Ttoken.ElseStmt)
+          {
+            console.log("else")
+            let elseBody:AstNode;
+            advance()
+            elseBody = parseBlockExpression("conditional")
+            return {body:body, condition:condition, elseBody:elseBody, conditionType:"if", type:AstNodeType.ConditionalStatement} as ConditionalStatementNode
+            //expect(Ttoken.CloseBrace, "} की अपेछा थी")
+          }
+          else
+          return {body:body, condition:condition, conditionType:"if", type:AstNodeType.ConditionalStatement} as ConditionalStatementNode
+        
+        
+       
+      }
       
       //for anonymous blocks
       function parseBlockExpression(context?:String): AstNode
@@ -426,7 +486,7 @@ export function parse(inputCode: string): AstNode {
             
         }
         expect(Ttoken.CloseBrace, "} की अपेछा थी");
-        console.log(context)
+        
         return {body:body, type:AstNodeType.Block, hasContinue:hasContinue, context:context} as BlockNode
         
         //return parseAsignmentExpression()

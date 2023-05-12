@@ -1,5 +1,5 @@
 import { BlockValueNode, BooleanValueNode, FunctionValueNode, MK_NULL, NativeFunctionNode, NullValueNode, NumericValueNode, ObjectValueNode, ValueNode, ValueNodeType} from "./values";
-import {AstNode, FunctionDeclarationNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode, ObjectLiteralNode, CallExpressionNode, BlockNode} from "../AST"
+import {AstNode, FunctionDeclarationNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode, ObjectLiteralNode, CallExpressionNode, BlockNode, ConditionalStatementNode} from "../AST"
 import Environment from "./environment";
 
 export function evaluate(astNode:AstNode, env:Environment) : ValueNode
@@ -45,6 +45,11 @@ export function evaluate(astNode:AstNode, env:Environment) : ValueNode
         
         case AstNodeType.CallExpression:
             return evaluateCallExpression(astNode as CallExpressionNode, env);
+       
+        case AstNodeType.ConditionalStatement:
+            {
+                return evaluateConditionalStatements(astNode as ConditionalStatementNode, env);
+            }
 
         
         
@@ -98,31 +103,31 @@ function evaluateNumericBinExp(left:NumericValueNode, right:NumericValueNode, op
         return {type:ValueNodeType.NumericLiteral,value:result }
     }
 
-    function evaluateBooleanBinExp(left:BooleanValueNode, right:BooleanValueNode, operator: string):BooleanValueNode
+function evaluateBooleanBinExp(left:BooleanValueNode, right:BooleanValueNode, operator: string):BooleanValueNode
+{
+    let result:boolean = false;
+    switch(operator)
     {
-        let result:boolean = false;
-        switch(operator)
-        {
-            case '+':
-            case '-':
-            case "*":           
-            case "/":
-            case "%":
-                `सत्यत्व कार्य के समय ${operator} का प्रयोग वर्जित है । `;
-                break;
+        case '+':
+        case '-':
+        case "*":           
+        case "/":
+        case "%":
+            `सत्यत्व कार्य के समय ${operator} का प्रयोग वर्जित है । `;
+            break;
 
-            
-            case "और":
-                result = left.value && right.value
-                break;
-            case "या":
-                result = left.value || right.value
-                break;
-        }
         
-        //console.log(result)
-        return {type:ValueNodeType.BooleanLiteral,value:result } as BooleanValueNode
+        case "और":
+            result = left.value && right.value
+            break;
+        case "या":
+            result = left.value || right.value
+            break;
     }
+    
+    //console.log(result)
+    return {type:ValueNodeType.BooleanLiteral,value:result } as BooleanValueNode
+}
 
 function evaluateBinaryExpression(operation:BinaryExpressionNode, env:Environment):ValueNode
 {
@@ -193,20 +198,49 @@ export function evaluateCallExpression(expression: CallExpressionNode, env: Envi
         const fn = fxn as FunctionValueNode;
         const scope = new Environment(fn.declarationEnvironment);
 
-        
         for(let i=0; i<fn.params.length; i++)
             scope.declare(fn.params[i], params[i], true);
         
         return evaluateBlockStatement(fn.body, scope);
-        
-
     }
+    
     
     
     throw "गैर-कर्म मान को बुला नहीं सकते"+JSON.stringify(fxn);
     
 } 
 
+function evaluateConditionalStatements(conditionStmt:ConditionalStatementNode , env: Environment): ValueNode {
+   const condition  = evaluate(conditionStmt.condition, env);
+   let conditionEvaluated:boolean = false;
+   if(condition.type==ValueNodeType.BooleanLiteral && (condition as BooleanValueNode).value)
+    {
+        console.log('if')
+        return evaluateBlockStatement(conditionStmt.body, env);
+    }
+    else {
+        // the if condition is false, so check the else if conditions
+        for (const elif of conditionStmt.elifBody) {
+          const elifCondition = evaluate(elif.condition, env);
+          if (elifCondition.type === ValueNodeType.BooleanLiteral && (elifCondition as BooleanValueNode).value) {
+             evaluateBlockStatement(elif.body, env);
+             
+          }
+          
+        }
+    
+    if (conditionStmt.elseBody && !(condition as BooleanValueNode).value) {
+        // no if or else if conditions were true, so evaluate the else block if it exists
+            return evaluateBlockStatement(conditionStmt.elseBody, env);
+      } else {
+        // no if or else if conditions were true, and there is no else block, so return undefined
+        return MK_NULL();
+      }
+
+
+    }
+
+}
 
 
 
@@ -222,6 +256,7 @@ function evaluateFunctionDeclaration(declaration: FunctionDeclarationNode, env: 
 
     return env.declare(declaration.name, fxn, true)
 }
+
 
 function evaluateBlockStatement(block: BlockNode, env: Environment, context?:string): ValueNode {
 
@@ -240,4 +275,6 @@ function evaluateBlockStatement(block: BlockNode, env: Environment, context?:str
     return lastStatement;
 
 }
+
+
 

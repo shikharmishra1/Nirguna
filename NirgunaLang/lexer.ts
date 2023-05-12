@@ -32,11 +32,12 @@ export enum Ttoken {
   Return = "Return",
   Continue = "Continue",
   Break = "Continue",
-  
+
 
   //Conditional Statements
   IfStmt = "If",
-  ElseStmt = "ElseStmt"
+  ElseStmt = "ElseStmt",
+  ElIfStmt = "ElIfStmt"
 }
 
 const hindiToStandardDigits: { [key: string]: string } = {
@@ -77,7 +78,8 @@ const KEYWORDS:Record<string, Ttoken> = {
 
     //conditional keywords
     यदि:Ttoken.IfStmt,
-    अन्यथा:Ttoken.ElseStmt,
+    उत:Ttoken.ElseStmt,
+    'उत यदि':Ttoken.ElIfStmt,
     और:Ttoken.AndOperator,
     या:Ttoken.OrOperator
 }
@@ -170,6 +172,22 @@ export function* tokenize(inputCode:string):Generator<Token> {
           identifier += src.shift();
         }
         if (KEYWORDS[identifier]!==undefined) {
+          if(identifier=='उत')
+          {
+            
+            if(src[1]+src[2]+src[3]=='\u092f\u0926\u093f')
+            {
+              src.shift();
+              src.shift();
+              src.shift();
+              src.shift();
+              yield token('उत यदि', KEYWORDS['उत यदि']);
+            }
+            else
+            {
+              yield token(identifier, KEYWORDS[identifier]);
+            }
+          }
           
           yield token(identifier, KEYWORDS[identifier]);
         } else {

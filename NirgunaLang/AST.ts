@@ -15,7 +15,9 @@ export enum AstNodeType {
     ObjectLiteral = "ObjectLiteral",
     FunctionDeclaration = "FunctionDeclaration",
     Block="Block",
-    ConditionalExpression="ConditionalExpression"
+    ConditionalExpression="ConditionalExpression",
+    ConditionalStatement="ConditionalStatement",
+    ElifStatement="ElifStatement"
   }
 
   export interface AssignmentExpressionNode extends ExpressionNode {
@@ -41,6 +43,21 @@ export enum AstNodeType {
     body: BlockNode;
   }
 
+  export interface ConditionalStatementNode extends AstNode {
+    type: AstNodeType.ConditionalStatement;
+    condition: BinaryExpressionNode;
+    conditionType:string;
+    elseBody: BlockNode;
+    elifBody:ElifNode[];
+    body: BlockNode;
+  }
+  export interface ElifNode extends AstNode
+  {
+    type: AstNodeType.ElifStatement;
+    condition:BinaryExpressionNode;
+    body:BlockNode;
+  }
+
   export interface BlockNode extends AstNode {
     type: AstNodeType.Block;
     //parameters: string[];
@@ -60,7 +77,9 @@ export enum AstNodeType {
     operator: string;
     left: ExpressionNode;
     right: ExpressionNode;
-  } 
+  }
+  
+  
 
   export interface CallExpressionNode extends ExpressionNode {
     type: AstNodeType.CallExpression;
