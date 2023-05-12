@@ -14,7 +14,7 @@ export enum ValueNodeType {
     StringLiteral = "StringLiteral",
     NativeFunctions = "NativeFunctions",
     Block = "Block",
-    
+    ConditionalStatement = "ConditionalStatement", 
   }
   
   export interface ValueNode {
@@ -43,6 +43,11 @@ export enum ValueNodeType {
   export interface BooleanValueNode extends ValueNode {
     type: ValueNodeType.BooleanLiteral;
     value: boolean;
+  }
+
+  export interface ConditionalValueNode extends ValueNode {
+    type: ValueNodeType.ConditionalStatement;
+    value:ValueNode[]
   }
   
   export interface StringLiteralNode extends ValueNode {

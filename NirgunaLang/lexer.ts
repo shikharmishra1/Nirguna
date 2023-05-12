@@ -20,7 +20,8 @@ export enum Ttoken {
   DotOperator = "Dot Operator",
   AndOperator = "AndOperator",
   OrOperator = "OrOperator",
-
+  NotOperator = "NotOperator",
+  
 
   //keywords
   Constant = "Constant",
@@ -38,6 +39,7 @@ export enum Ttoken {
   IfStmt = "If",
   ElseStmt = "ElseStmt",
   ElIfStmt = "ElIfStmt"
+
 }
 
 const hindiToStandardDigits: { [key: string]: string } = {
@@ -141,10 +143,24 @@ export function* tokenize(inputCode:string):Generator<Token> {
         yield token(src.shift(), Ttoken.CloseBrace);
       } else if (["+","-","*","/","%"].includes(src[0])) {
         yield token(src.shift(), Ttoken.BinaryOperator);
-      } else if (["<","<=",">=","==",">"].includes(src[0])) {
-        yield token(src.shift(), Ttoken.ConditionalOperator);
       } else if (src[0] === ".") {
         yield token(src.shift(), Ttoken.DotOperator);
+      } else if (src[0] === "<") {
+          if(src[1]==="=")
+          {
+            src.shift();
+            src.shift();
+            yield token("<=", Ttoken.ConditionalOperator);
+          }
+          yield token(src.shift(), Ttoken.ConditionalOperator);
+      } else if(src[0] === ">") {
+          if(src[1]==="=")
+            {
+              src.shift();
+              src.shift();
+              yield token(">=", Ttoken.ConditionalOperator);
+            }
+          yield token(src.shift(), Ttoken.ConditionalOperator);
       }
       
       else if (src[0] === "।") {
@@ -152,6 +168,12 @@ export function* tokenize(inputCode:string):Generator<Token> {
       } else if (["+","-","*","/","%"].includes(src[0])) {
         yield token(src.shift(), Ttoken.BinaryOperator);
       } else if(src[0]==='='){
+          if(src[1]==="=")
+          {
+            src.shift();
+            src.shift();
+            yield token("==", Ttoken.ConditionalOperator);
+          }
         yield token(src.shift(), Ttoken.Equals);
       } 
        else if(src[0]===','){
@@ -185,6 +207,7 @@ export function* tokenize(inputCode:string):Generator<Token> {
             }
             else
             {
+
               yield token(identifier, KEYWORDS[identifier]);
             }
           }

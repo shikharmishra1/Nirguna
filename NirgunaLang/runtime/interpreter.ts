@@ -123,20 +123,64 @@ function evaluateBooleanBinExp(left:BooleanValueNode, right:BooleanValueNode, op
         case "या":
             result = left.value || right.value
             break;
+        case "==":
+            result = left.value == right.value
+            break;
     }
-    
-    //console.log(result)
-    return {type:ValueNodeType.BooleanLiteral,value:result } as BooleanValueNode
+    return {type:ValueNodeType.BooleanLiteral, value:result} as BooleanValueNode
 }
+    function evaluateLogicalExpression(left:NumericValueNode, right:NumericValueNode, operator: string):BooleanValueNode
+    {
+        let result:boolean = false;
+        switch(operator)
+        {
+            case '+':
+            case '-':
+            case "*":           
+            case "/":
+            case "%":
+            case "और":
+
+            case "या":
+                `सत्यत्व कार्य के समय ${operator} का प्रयोग वर्जित है । `;
+                break;
+
+
+            case "<":
+                result = left.value < right.value
+                break;
+            case ">":
+                result = left.value > right.value
+                break;
+            case "<=":
+                result = left.value <= right.value
+                break;
+            case ">=":
+                result = left.value >= right.value
+                break;
+            case "==":
+                result = left.value == right.value
+                break;
+        }
+        
+        //console.log(result)
+        return {type:ValueNodeType.BooleanLiteral,value:result } as BooleanValueNode
+    }
 
 function evaluateBinaryExpression(operation:BinaryExpressionNode, env:Environment):ValueNode
 {
     const left = evaluate(operation.left, env);
     const right = evaluate(operation.right, env);
+    
+    if(left.type == ValueNodeType.NumericLiteral && right.type == ValueNodeType.NumericLiteral && ["<", ">", "<=", ">=", "==", "!="].includes(operation.operator))
+    {
+        return evaluateLogicalExpression(left as NumericValueNode, right as NumericValueNode, operation.operator)
+    }
 
-    if (left.type == ValueNodeType.NumericLiteral && right.type == ValueNodeType.NumericLiteral) {
+    else if (left.type == ValueNodeType.NumericLiteral && right.type == ValueNodeType.NumericLiteral && ["<", ""]) {
         
         return evaluateNumericBinExp(left as NumericValueNode, right as NumericValueNode, operation.operator);
+            
     }
 
    if (left.type == ValueNodeType.BooleanLiteral && right.type == ValueNodeType.BooleanLiteral) {
@@ -212,22 +256,24 @@ export function evaluateCallExpression(expression: CallExpressionNode, env: Envi
 
 function evaluateConditionalStatements(conditionStmt:ConditionalStatementNode , env: Environment): ValueNode {
    const condition  = evaluate(conditionStmt.condition, env);
-   let conditionEvaluated:boolean = false;
+   
    if(condition.type==ValueNodeType.BooleanLiteral && (condition as BooleanValueNode).value)
     {
-        console.log('if')
+        console.log(conditionStmt.body)
         return evaluateBlockStatement(conditionStmt.body, env);
     }
     else {
         // the if condition is false, so check the else if conditions
-        for (const elif of conditionStmt.elifBody) {
-          const elifCondition = evaluate(elif.condition, env);
-          if (elifCondition.type === ValueNodeType.BooleanLiteral && (elifCondition as BooleanValueNode).value) {
-             evaluateBlockStatement(elif.body, env);
-             
-          }
+        if(conditionStmt.elifBody){
+            for (const elif of conditionStmt.elifBody) {
+            const elifCondition = evaluate(elif.condition, env);
+            if (elifCondition.type === ValueNodeType.BooleanLiteral && (elifCondition as BooleanValueNode).value) {
+                evaluateBlockStatement(elif.body, env);
+                
+            }
           
         }
+    }
     
     if (conditionStmt.elseBody && !(condition as BooleanValueNode).value) {
         // no if or else if conditions were true, so evaluate the else block if it exists
