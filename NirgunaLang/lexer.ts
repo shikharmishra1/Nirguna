@@ -146,21 +146,22 @@ export function* tokenize(inputCode:string):Generator<Token> {
       } else if (src[0] === ".") {
         yield token(src.shift(), Ttoken.DotOperator);
       } else if (src[0] === "<") {
-          if(src[1]==="=")
+          if(src[0]+src[1]==="<=")
           {
-            src.shift();
-            src.shift();
-            yield token("<=", Ttoken.ConditionalOperator);
+            
+            yield token(src.shift()!+src.shift()!, Ttoken.ConditionalOperator);
+            
           }
-          yield token(src.shift(), Ttoken.ConditionalOperator);
+          else
+            yield token(src.shift(), Ttoken.ConditionalOperator);
       } else if(src[0] === ">") {
           if(src[1]==="=")
             {
-              src.shift();
-              src.shift();
-              yield token(">=", Ttoken.ConditionalOperator);
+              yield token(src.shift()!+src.shift()!, Ttoken.ConditionalOperator);
+            
             }
-          yield token(src.shift(), Ttoken.ConditionalOperator);
+            else
+              yield token(src.shift(), Ttoken.ConditionalOperator);
       }
       
       else if (src[0] === "।") {
@@ -170,12 +171,22 @@ export function* tokenize(inputCode:string):Generator<Token> {
       } else if(src[0]==='='){
           if(src[1]==="=")
           {
-            src.shift();
-            src.shift();
-            yield token("==", Ttoken.ConditionalOperator);
+            yield token(src.shift()!+src.shift()!, Ttoken.ConditionalOperator);
+          
           }
-        yield token(src.shift(), Ttoken.Equals);
-      } 
+          else
+            yield token(src.shift(), Ttoken.Equals);
+      } else if(src[0]==='!'){
+          if(src[1]==="=")
+          {
+            yield token(src.shift()!+src.shift()!, Ttoken.ConditionalOperator);
+          
+          }
+          else
+            yield token(src.shift(), Ttoken.NotOperator);
+    }
+      
+      
        else if(src[0]===','){
         yield token(src.shift(), Ttoken.Comma);
       } else if(src[0]===':'){
