@@ -1,5 +1,5 @@
-import { BlockValueNode, BooleanValueNode, FunctionValueNode, MK_NULL, NativeFunctionNode, NullValueNode, NumericValueNode, ObjectValueNode, ValueNode, ValueNodeType} from "./values";
-import {AstNode, FunctionDeclarationNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode, ObjectLiteralNode, CallExpressionNode, BlockNode, ConditionalStatementNode} from "../AST"
+import { BlockValueNode, BooleanValueNode, FunctionValueNode, MK_NULL, MK_NUMBER, NativeFunctionNode, NullValueNode, NumericValueNode, ObjectValueNode, ValueNode, ValueNodeType} from "./values";
+import {AstNode, FunctionDeclarationNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode, ObjectLiteralNode, CallExpressionNode, BlockNode, ConditionalStatementNode, LoopStatementNode} from "../AST"
 import Environment from "./environment";
 
 export function evaluate(astNode:AstNode, env:Environment) : ValueNode
@@ -21,6 +21,9 @@ export function evaluate(astNode:AstNode, env:Environment) : ValueNode
             } as NullValueNode;
         case AstNodeType.BinaryExpression:
             return evaluateBinaryExpression(astNode as BinaryExpressionNode, env);
+        
+        case AstNodeType.LoopStatement:
+            return evaluateLoopStatement(astNode as LoopStatementNode, env);
 
         case AstNodeType.Identifier:
             return evaluateIdentifier(astNode as IdentifierNode, env);
@@ -129,43 +132,106 @@ function evaluateBooleanBinExp(left:BooleanValueNode, right:BooleanValueNode, op
     }
     return {type:ValueNodeType.BooleanLiteral, value:result} as BooleanValueNode
 }
-    function evaluateLogicalExpression(left:NumericValueNode, right:NumericValueNode, operator: string):BooleanValueNode
+function evaluateLogicalExpression(left:NumericValueNode, right:NumericValueNode, operator: string):BooleanValueNode
+{
+    let result:boolean = false;
+    switch(operator)
     {
-        let result:boolean = false;
-        switch(operator)
-        {
-            case '+':
-            case '-':
-            case "*":           
-            case "/":
-            case "%":
-            case "और":
+        case '+':
+        case '-':
+        case "*":           
+        case "/":
+        case "%":
+        case "और":
 
-            case "या":
-                `सत्यत्व कार्य के समय ${operator} का प्रयोग वर्जित है । `;
-                break;
+        case "या":
+            `सत्यत्व कार्य के समय ${operator} का प्रयोग वर्जित है । `;
+            break;
 
 
-            case "<":
-                result = left.value < right.value
-                break;
-            case ">":
-                result = left.value > right.value
-                break;
-            case "<=":
-                result = left.value <= right.value
-                break;
-            case ">=":
-                result = left.value >= right.value
-                break;
-            case "==":
-                result = left.value == right.value
-                break;
-        }
-        
-        //console.log(result)
-        return {type:ValueNodeType.BooleanLiteral,value:result } as BooleanValueNode
+        case "<":
+            result = left.value < right.value
+            break;
+        case ">":
+            result = left.value > right.value
+            break;
+        case "<=":
+
+            result = left.value <= right.value
+            break;
+        case ">=":
+            result = left.value >= right.value
+            break;
+        case "==":
+            result = left.value == right.value
+            break;
+        case "!=":
+            result = left.value != right.value
+            break;
     }
+    
+    //console.log(result)
+    return {type:ValueNodeType.BooleanLiteral,value:result } as BooleanValueNode
+}
+
+function evaluateLoopStatement(loop:LoopStatementNode, env:Environment):ValueNode
+{
+    const body:BlockNode = loop.body
+    switch(loop.loopType)
+    {
+        case "for":
+        {
+            evaluate(loop.from, env)
+            const to:NumericValueNode = evaluate(loop.to, env) as NumericValueNode
+            if(loop.from.type==AstNodeType.VariableDeclaration)
+            {
+                while((env.lookup((loop.from as VariableDeclarationNode).name) as NumericValueNode).value !== to.value)
+                {
+                    evaluateBlockStatement(body, env)
+                    env.assign((loop.from as VariableDeclarationNode).name, MK_NUMBER((env.lookup((loop.from as VariableDeclarationNode).name) as NumericValueNode).value+1))
+
+                }
+            }
+
+            //for without var declaration
+            else if(loop.from.type==AstNodeType.AssignmentExpression)
+            {
+                const fromName = ((loop.from as AssignmentExpressionNode).assigne as VariableDeclarationNode).name
+                while((env.lookup(fromName) as NumericValueNode).value !== to.value)
+                {
+                    evaluateBlockStatement(body, env)
+                    env.assign(((loop.from as AssignmentExpressionNode).assigne as VariableDeclarationNode).name, MK_NUMBER((env.lookup(((loop.from as AssignmentExpressionNode).assigne as VariableDeclarationNode).name) as NumericValueNode).value+1))
+
+                }
+            }
+            else
+                throw "unrecognized"
+
+        }
+        break;
+        case "while":
+            {
+                while((evaluate(loop.whileCondition, env) as BooleanValueNode).value)
+                {
+                    evaluateBlockStatement(body, env)
+                }
+               break; 
+            }
+        case "doWhile":
+            {
+                do
+                {
+                    evaluateBlockStatement(body, env)
+                } while((evaluate(loop.whileCondition, env) as BooleanValueNode).value)
+
+
+            }
+
+        }
+   
+
+    return {} as ValueNode
+}
 
 function evaluateBinaryExpression(operation:BinaryExpressionNode, env:Environment):ValueNode
 {
@@ -259,7 +325,7 @@ function evaluateConditionalStatements(conditionStmt:ConditionalStatementNode , 
    
    if(condition.type==ValueNodeType.BooleanLiteral && (condition as BooleanValueNode).value)
     {
-        console.log(conditionStmt.body)
+  
         return evaluateBlockStatement(conditionStmt.body, env);
     }
     else {

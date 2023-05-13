@@ -21,7 +21,7 @@ export enum Ttoken {
   AndOperator = "AndOperator",
   OrOperator = "OrOperator",
   NotOperator = "NotOperator",
-  
+
 
   //keywords
   Constant = "Constant",
@@ -38,8 +38,13 @@ export enum Ttoken {
   //Conditional Statements
   IfStmt = "If",
   ElseStmt = "ElseStmt",
-  ElIfStmt = "ElIfStmt"
+  ElIfStmt = "ElIfStmt",
 
+  //loops
+  Loop = "Loop",
+  From = "From",
+  To = "To",
+  DoWhile = "DoWhile"
 }
 
 const hindiToStandardDigits: { [key: string]: string } = {
@@ -83,7 +88,13 @@ const KEYWORDS:Record<string, Ttoken> = {
     उत:Ttoken.ElseStmt,
     'उत यदि':Ttoken.ElIfStmt,
     और:Ttoken.AndOperator,
-    या:Ttoken.OrOperator
+    या:Ttoken.OrOperator,
+
+    //loops
+    चक्र:Ttoken.Loop,
+    से:Ttoken.From,
+    तक:Ttoken.To,
+    जब:Ttoken.DoWhile,
 }
 
 

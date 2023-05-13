@@ -17,11 +17,13 @@ export enum AstNodeType {
     Block="Block",
     ConditionalExpression="ConditionalExpression",
     ConditionalStatement="ConditionalStatement",
-    ElifStatement="ElifStatement"
+    ElifStatement="ElifStatement",
+    LoopStatement="LoopStatement",
   }
 
   export interface AssignmentExpressionNode extends ExpressionNode {
     type: AstNodeType.AssignmentExpression,
+    context:string,
     assigne:ExpressionNode,
     value:ExpressionNode,
   }
@@ -51,6 +53,16 @@ export enum AstNodeType {
     elifBody:ElifNode[];
     body: BlockNode;
   }
+
+  export interface LoopStatementNode extends AstNode {
+    type: AstNodeType.LoopStatement;
+    loopType: string;
+    whileCondition: BinaryExpressionNode;
+    from: ExpressionNode;
+    to: ExpressionNode;
+    body: BlockNode;
+  }
+
   export interface ElifNode extends AstNode
   {
     type: AstNodeType.ElifStatement;

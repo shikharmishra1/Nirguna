@@ -19,6 +19,7 @@ import {
   BlockNode,
   ConditionalStatementNode,
   ElifNode,
+  LoopStatementNode,
 } from "./AST";
 import { MK_NULL } from "./runtime/values";
 
@@ -69,6 +70,9 @@ export function parse(inputCode: string): AstNode {
         case Ttoken.IfStmt:
         case Ttoken.ElseStmt:
           return parseConditionalStatement();
+        
+        case Ttoken.Loop:
+          return parseLoopStatement();
       }
     }
 
@@ -87,6 +91,7 @@ export function parse(inputCode: string): AstNode {
         while(tokens[0].type==Ttoken.AndOperator||tokens[0].type==Ttoken.OrOperator||tokens[0].type==Ttoken.ConditionalOperator)
         {
             const operator = advance().value;
+            
             const right = parseCallMemberExpression();
             left = {
                 type: AstNodeType.BinaryExpression,
@@ -204,7 +209,16 @@ export function parse(inputCode: string): AstNode {
         advance(); //advance past equal token
         
         const value = parseAsignmentExpression()
+
+       if(tokens.at(0)?.type==Ttoken.From)
+        {
+
+                advance()
+               return {value:value, assigne:left, type:AstNodeType.AssignmentExpression} as AssignmentExpressionNode
+        }
+
         return {value:value, assigne:left, type:AstNodeType.AssignmentExpression} as AssignmentExpressionNode
+        
 
       }
       
@@ -413,6 +427,76 @@ export function parse(inputCode: string): AstNode {
 
       }
 
+      function parseLoopStatement():AstNode
+      {
+        advance(); //skips the चक्र keyword
+        
+        let loopType = "";
+        let from:AstNode;
+        let to:AstNode;
+        let body:AstNode;
+        let whileCondition:AstNode;
+
+        
+        if(tokens[0].type==Ttoken.OpenBrace)
+        {
+          console.log(tokens[1].type)
+          body = parseBlockExpression("loop")
+          expect(Ttoken.DoWhile, "चक्र के बाद 'जब' शब्द की अपेछा थी")
+          expect(Ttoken.From, "चक्र के बाद से की अपेछा थी")
+          whileCondition = parseConditionalExpression();
+          expect(Ttoken.CloseParanthesis, ") की अपेछा थी")
+          return {body:body, whileCondition:whileCondition, loopType:"doWhile", type:AstNodeType.LoopStatement } as LoopStatementNode
+          
+        }
+
+        expect(Ttoken.OpenParanthesis, "( की अपेछा थी")
+        if(tokens[0].type==Ttoken.Variable || tokens[0].type==Ttoken.Constant)
+          {
+            //for 
+            console.log('for')
+
+            from = parseVariableDeclaration();
+            
+            expect(Ttoken.From, "चक्र के बाद से की अपेछा थी")
+            to = parseExpression();
+            expect(Ttoken.CloseParanthesis, ") की अपेछा थी")
+            const body = parseBlockExpression("loop")
+            return {from:from, to:to, body:body, loopType:"for", type:AstNodeType.LoopStatement } as LoopStatementNode
+            
+          }
+        
+        if(tokens.at(0)?.type==Ttoken.Identifier)
+        {
+          if(tokens.at(1)?.type==Ttoken.ConditionalOperator)
+          {
+            //while loop
+            whileCondition = parseConditionalExpression();
+            expect(Ttoken.CloseParanthesis, ") की अपेछा थी")
+            body = parseBlockExpression("loop");
+
+            console.log(whileCondition)
+            return {whileCondition:whileCondition,body:body, loopType:"while", type:AstNodeType.LoopStatement } as LoopStatementNode
+          }
+
+          //चक्र (अ = something से something)
+          console.log(tokens.at(0))
+          from = parseExpression();
+          to = parseExpression();
+          expect(Ttoken.CloseParanthesis, ") की अपेछा थी")
+          body = parseBlockExpression("loop");
+          
+          return {from:from, to:to, body:body, loopType:"for", type:AstNodeType.LoopStatement } as LoopStatementNode
+        }  
+        else
+          {
+            //
+            return {} as AstNode
+            //while loop
+          }
+
+      }
+
       function parseConditionalStatement(): AstNode
       {
           advance(); //skips if  keyword
@@ -423,7 +507,7 @@ export function parse(inputCode: string): AstNode {
           const body = parseBlockExpression("conditional")
           if(tokens.at(0)?.type==Ttoken.ElIfStmt)
           {
-            console.log("what")
+            
             let elifBodies:AstNode[] =[];
             while(tokens.at(0)?.type==Ttoken.ElIfStmt)
             {
@@ -454,7 +538,7 @@ export function parse(inputCode: string): AstNode {
 
            if(tokens.at(0)?.type==Ttoken.ElseStmt)
           {
-            console.log("else")
+            
             advance()
             advance()
             let elseBody:AstNode;
