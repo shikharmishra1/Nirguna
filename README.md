@@ -6,7 +6,7 @@ Nirguna is an WIP devanagari scripting language
 
 - [Build Instruction](#buildinstruction)
 - [License](#license)
-- [Conntact](#contact)
+- [Contact](#contact)
 
 ## Build Instruction
 
