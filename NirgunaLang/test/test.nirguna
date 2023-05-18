@@ -1,14 +1,34 @@
-मान अ = ६ ।
-  मान ब = ६। 
+मान अ = ०।
+मान ब = ६ । 
+
+#चक्र is kind of a super loop which can detect the type of loop according to the arguments you pass into it
+
+#For loop
+चक्र(अ = ६ से 7)
+{
+  लेख(अ)
+} 
+
+#While Loop
+चक्र(अ <= १०)
+{
+  मान स = ६ । 
+  लेख(अ)
+  अ = अ +१ 
+} 
+
+#Do While Loop
 चक्र
 {
-
-  अ = अ + 1
   लेख(अ)
-}जब(अ <१० )
+  अ = अ +१ 
+} जब (अ<१६) 
 
-
-
+#decrementing for loop
+चक्र(अ=१५ से ६)
+{
+  लेख(अ)
+}
 
 #नीचे लिखा हुआ विवरण सीमा (scope) के बाहर होने के कारण त्रुटि पैदा करेगा।
 
