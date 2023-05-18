@@ -80,5 +80,11 @@ export default class Environment{
         return env.variables.get(name) as ValueNode
     }
 
+    public delete(name:string):boolean
+    {
+        const env = this.resolve(name);
+        return env.variables.delete(name)
+    }
+
 
 }
