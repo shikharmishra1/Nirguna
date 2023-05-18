@@ -343,6 +343,7 @@ export function evaluateCallExpression(expression: CallExpressionNode, env: Envi
 
 function evaluateConditionalStatements(conditionStmt:ConditionalStatementNode , env: Environment): ValueNode {
    const condition  = evaluate(conditionStmt.condition, env);
+   let trueElif = 0;
    
    if(condition.type==ValueNodeType.BooleanLiteral && (condition as BooleanValueNode).value)
     {
@@ -355,14 +356,15 @@ function evaluateConditionalStatements(conditionStmt:ConditionalStatementNode , 
             for (const elif of conditionStmt.elifBody) {
             const elifCondition = evaluate(elif.condition, env);
             if (elifCondition.type === ValueNodeType.BooleanLiteral && (elifCondition as BooleanValueNode).value) {
+                trueElif++;
                 evaluateBlockStatement(elif.body, env);
                 
             }
-          
         }
+
     }
     
-    if (conditionStmt.elseBody && !(condition as BooleanValueNode).value) {
+    if (conditionStmt.elseBody && !(condition as BooleanValueNode).value && trueElif === 0) {
         // no if or else if conditions were true, so evaluate the else block if it exists
             return evaluateBlockStatement(conditionStmt.elseBody, env);
       } else {
