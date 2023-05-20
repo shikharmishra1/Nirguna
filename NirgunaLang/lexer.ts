@@ -125,10 +125,11 @@ export function* tokenize(inputCode:string):Generator<Token> {
     let skipLine = false;
     
     //tokenizes the input code, yielding tokens one by one to save memory
+    console.time("tokenize");
     while (src.length > 0) {
       const uwu = convertHindiToStandardDigits(src[0]);
-      
-      //skips the whole line
+    
+      // Skips the whole line
       if (skipLine) {
         if (src[0] === "\n") {
           skipLine = false;
@@ -136,134 +137,121 @@ export function* tokenize(inputCode:string):Generator<Token> {
         src.shift();
         continue;
       }
-      
-      //skips whe encountered # token
+    
+      // Skips when encountering "#" token
       if (src[0] === "#") {
         skipLine = true;
         src.shift();
         continue;
       }
-
-      if (src[0] === "(") {
-        yield token(src.shift(), Ttoken.OpenParanthesis);
-      } else if (src[0] === ")") {
-        yield token(src.shift(), Ttoken.CloseParanthesis);
-      } else if (src[0] === "{") {
-        yield token(src.shift(), Ttoken.OpenBrace);
-      } else if (src[0] === "}") {
-        yield token(src.shift(), Ttoken.CloseBrace);
-      } else if (["+","-","*","/","%"].includes(src[0])) {
-        yield token(src.shift(), Ttoken.BinaryOperator);
-      } else if (src[0] === ".") {
-        yield token(src.shift(), Ttoken.DotOperator);
-      } else if (src[0] === "<") {
-          if(src[0]+src[1]==="<=")
-          {
-            
-            yield token(src.shift()!+src.shift()!, Ttoken.ConditionalOperator);
-            
-          }
-          else
+    
+      switch (src[0]) {
+        case "(":
+          yield token(src.shift(), Ttoken.OpenParanthesis);
+          break;
+        case ")":
+          yield token(src.shift(), Ttoken.CloseParanthesis);
+          break;
+        case "{":
+          yield token(src.shift(), Ttoken.OpenBrace);
+          break;
+        case "}":
+          yield token(src.shift(), Ttoken.CloseBrace);
+          break;
+        case "+":
+        case "-":
+        case "*":
+        case "/":
+        case "%":
+          yield token(src.shift(), Ttoken.BinaryOperator);
+          break;
+        case ".":
+          yield token(src.shift(), Ttoken.DotOperator);
+          break;
+        case "<":
+          if (src[0] + src[1] === "<=") {
+            yield token(src.shift()! + src.shift()!, Ttoken.ConditionalOperator);
+          } else {
             yield token(src.shift(), Ttoken.ConditionalOperator);
-      } else if(src[0] === ">") {
-          if(src[1]==="=")
-            {
-              yield token(src.shift()!+src.shift()!, Ttoken.ConditionalOperator);
-            
-            }
-            else
-              yield token(src.shift(), Ttoken.ConditionalOperator);
-      }
-      
-      else if (src[0] === "।") {
-        yield token(src.shift(), Ttoken.PurnaViraam);
-      } else if (["+","-","*","/","%"].includes(src[0])) {
-        yield token(src.shift(), Ttoken.BinaryOperator);
-      } else if(src[0]==='='){
-          if(src[1]==="=")
-          {
-            yield token(src.shift()!+src.shift()!, Ttoken.ConditionalOperator);
-          
           }
-          else
+          break;
+        case ">":
+          if (src[1] === "=") {
+            yield token(src.shift()! + src.shift()!, Ttoken.ConditionalOperator);
+          } else {
+            yield token(src.shift(), Ttoken.ConditionalOperator);
+          }
+          break;
+        case "।":
+          yield token(src.shift(), Ttoken.PurnaViraam);
+          break;
+        case "=":
+          if (src[1] === "=") {
+            yield token(src.shift()! + src.shift()!, Ttoken.ConditionalOperator);
+          } else {
             yield token(src.shift(), Ttoken.Equals);
-      } else if(src[0]==='!'){
-          if(src[1]==="=")
-          {
-            yield token(src.shift()!+src.shift()!, Ttoken.ConditionalOperator);
-          
           }
-          else
+          break;
+        case "!":
+          if (src[1] === "=") {
+            yield token(src.shift()! + src.shift()!, Ttoken.ConditionalOperator);
+          } else {
             yield token(src.shift(), Ttoken.NotOperator);
-    }
-      
-      
-       else if(src[0]===','){
-        yield token(src.shift(), Ttoken.Comma);
-      } else if(src[0]===':'){
-        yield token(src.shift(), Ttoken.Colon);
-      } else if(src[0]==='['){
-        yield token(src.shift(), Ttoken.OpenBracket);
-      } else if(src[0]===']'){
-        yield token(src.shift(), Ttoken.CloseBracket);
-      }
-       
-      //handles identifiers and keywords
-       else if (hindiIdentifierRegex.test(src[0]) && !(/[०-९]/g.test(src[0])) ) {
-        
-        let identifier = "";
-        while (src.length > 0 && hindiIdentifierRegex.test(src[0])) {
-          identifier += src.shift();
-        }
-        if (KEYWORDS[identifier]!==undefined) {
-          if(identifier=='उत')
-          {
-            
-            if(src[1]+src[2]+src[3]=='\u092f\u0926\u093f')
-            {
-              src.shift();
-              src.shift();
-              src.shift();
-              src.shift();
-              yield token('उत यदि', KEYWORDS['उत यदि']);
+          }
+          break;
+        case ",":
+          yield token(src.shift(), Ttoken.Comma);
+          break;
+        case ":":
+          yield token(src.shift(), Ttoken.Colon);
+          break;
+        case "[":
+          yield token(src.shift(), Ttoken.OpenBracket);
+          break;
+        case "]":
+          yield token(src.shift(), Ttoken.CloseBracket);
+          break;
+        default:
+          // Handles identifiers and keywords
+          if (hindiIdentifierRegex.test(src[0]) && !(/[०-९]/g.test(src[0]))) {
+            let identifier = "";
+            while (src.length > 0 && hindiIdentifierRegex.test(src[0])) {
+              identifier += src.shift();
             }
-            else
-            {
-
-              yield token(identifier, KEYWORDS[identifier]);
+            if (KEYWORDS[identifier] !== undefined) {
+              if (identifier == 'उत') {
+                if (src[1] + src[2] + src[3] == '\u092f\u0926\u093f') {
+                  src.shift();
+                  src.shift();
+                  src.shift();
+                  src.shift();
+                  yield token('उत यदि', KEYWORDS['उत यदि']);
+                } else {
+                  yield token(identifier, KEYWORDS[identifier]);
+                }
+              }
+              yield token(identifier, KEYWORDS[        identifier]);
+            } else {
+              yield token(identifier, Ttoken.Identifier);
             }
           }
-          
-          yield token(identifier, KEYWORDS[identifier]);
-        } else {
-          
-          yield token(identifier, Ttoken.Identifier);
+          // Skips comments
+          // Handles numbers
+          else if (/^[\d.]+$/.test(convertHindiToStandardDigits(src[0]))) {
+            let num = "";
+            while (src.length > 0 && /^[\d.]$/.test(convertHindiToStandardDigits(src[0]))) {
+              num += convertHindiToStandardDigits(src.shift() ?? "");
+            }
+            yield token(num, Ttoken.Number);
+          } else if (isSkippable(src[0])) {
+            src.shift();
+          } else {
+            throw new Error(`Invalid token: ${src[0]}`);
+          }
         }
-        
       }
-      //skips comments
-      
-      
-      //handles numbers
-      else if (/^[\d.]+$/.test(convertHindiToStandardDigits(src[0]))) {
-        let num = "";
-       
-        while (src.length > 0 && /^[\d.]$/.test(convertHindiToStandardDigits(src[0]))) {
-          num += convertHindiToStandardDigits(src.shift()??"");
-          
-        }
-        yield token(num, Ttoken.Number);
-      }
-   
-      else if (isSkippable(src[0])) {
-        src.shift();
-        }
-      
-      else {
-        throw new Error(`Invalid token: ${src[0]}`);
-      }
-      
-    }
+    console.timeEnd("tokenize");
+    
 
     //defines end of file
     yield token("EOF", Ttoken.EndOfFile);
