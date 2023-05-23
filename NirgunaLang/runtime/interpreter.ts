@@ -1,5 +1,5 @@
-import { BlockValueNode, BooleanValueNode, FunctionValueNode, MK_NULL, MK_NUMBER, NativeFunctionNode, NullValueNode, NumericValueNode, ObjectValueNode, StringValueNode, ValueNode, ValueNodeType} from "./values";
-import {AstNode, FunctionDeclarationNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode, ObjectLiteralNode, CallExpressionNode, BlockNode, ConditionalStatementNode, LoopStatementNode, StringLiteralNode} from "../AST"
+import { ArrayValueNode, BlockValueNode, BooleanValueNode, FunctionValueNode, MK_NULL, MK_NUMBER, NativeFunctionNode, NullValueNode, NumericValueNode, ObjectValueNode, StringValueNode, ValueNode, ValueNodeType} from "./values";
+import {AstNode, FunctionDeclarationNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode, ObjectLiteralNode, CallExpressionNode, BlockNode, ConditionalStatementNode, LoopStatementNode, StringLiteralNode, ArrayNode} from "../AST"
 import Environment from "./environment";
 
 export function evaluate(astNode:AstNode, env:Environment) : ValueNode
@@ -18,6 +18,9 @@ export function evaluate(astNode:AstNode, env:Environment) : ValueNode
                 type: ValueNodeType.StringLiteral,
                 value: (astNode as StringLiteralNode).value,
             } as StringValueNode;
+        
+        case AstNodeType.Array:
+            return evaluateArray(astNode as ArrayNode, env);
         case AstNodeType.NullLiteral:
             return {
                 
@@ -415,4 +418,13 @@ function evaluateBlockStatement(block: BlockNode, env: Environment, context?:str
 }
 
 
+
+function evaluateArray(arrNode: ArrayNode, env:Environment): ValueNode {
+    let elements:ValueNode[] = [];
+    for(let arr of arrNode.value)
+    {
+        elements.push(evaluate(arr, env))
+    }
+    return {type:ValueNodeType.Array, value:elements} as ArrayValueNode;
+}
 
