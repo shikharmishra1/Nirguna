@@ -19,6 +19,8 @@ export enum AstNodeType {
     ConditionalStatement="ConditionalStatement",
     ElifStatement="ElifStatement",
     LoopStatement="LoopStatement",
+    StringLiteral="StringLiteral",
+    Array="Array",
   }
 
   export interface AssignmentExpressionNode extends ExpressionNode {
@@ -128,6 +130,15 @@ export enum AstNodeType {
   export interface NumericLiteralNode extends ExpressionNode {
     type: AstNodeType.NumericLiteral;
     value: number;
+  }
+  export interface ArrayNode extends ExpressionNode {
+    type: AstNodeType.Array;
+    value: Array<ExpressionNode>;
+  }
+
+  export interface StringLiteralNode extends ExpressionNode {
+    type: AstNodeType.StringLiteral;
+    value: string;
   }
 
   export interface NullLiteralNode extends ExpressionNode {

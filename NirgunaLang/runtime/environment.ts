@@ -79,7 +79,8 @@ export default class Environment{
         const env = this.resolve(name);
         return env.variables.get(name) as ValueNode
     }
-
+    
+    //deletes variable from current scope
     public delete(name:string):boolean
     {
         const env = this.resolve(name);

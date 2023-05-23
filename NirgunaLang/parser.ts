@@ -20,6 +20,8 @@ import {
   ConditionalStatementNode,
   ElifNode,
   LoopStatementNode,
+  StringLiteralNode,
+  ArrayNode,
 } from "./AST";
 import { MK_NULL } from "./runtime/values";
 
@@ -75,6 +77,26 @@ export function parse(inputCode: string): AstNode {
           return parseLoopStatement();
       }
     }
+
+    function parseArray():AstNode
+    {
+      
+      expect(Ttoken.OpenBracket, "[ की अपेक्षा थी।")
+      const elements  = Array<ExpressionNode>();
+      while(tokens[0].type !== Ttoken.CloseBracket)
+      {
+         const element = parseExpression();
+          elements.push(element);
+        if(tokens[0].type == Ttoken.Comma)
+        {
+          advance();
+        }
+      }
+      expect(Ttoken.CloseBracket, "] की अपेक्षा थी।")
+      //expect(Ttoken.PurnaViraam, "पूर्णविराम की अपेक्षा थी।")
+      return {type:AstNodeType.Array, value:elements} as ArrayNode
+    }
+
 
     function parseExpression():ExpressionNode
     {
@@ -200,21 +222,20 @@ export function parse(inputCode: string): AstNode {
      } as ProgramNode;
 
      function parseAsignmentExpression(): ExpressionNode {
-        
+
       const left = parseObjectExpression();
       
       if(tokens[0].type == Ttoken.Equals)
       {
-        
         advance(); //advance past equal token
         
         const value = parseAsignmentExpression()
+       
 
        if(tokens.at(0)?.type==Ttoken.From)
         {
-
-                advance()
-               return {value:value, assigne:left, type:AstNodeType.AssignmentExpression} as AssignmentExpressionNode
+            advance()
+            return {value:value, assigne:left, type:AstNodeType.AssignmentExpression} as AssignmentExpressionNode
         }
 
         return {value:value, assigne:left, type:AstNodeType.AssignmentExpression} as AssignmentExpressionNode
@@ -226,10 +247,17 @@ export function parse(inputCode: string): AstNode {
     }
     function parseObjectExpression():ExpressionNode
     {
+      if(tokens.at(0)?.type == Ttoken.OpenBracket)
+      {
+        console.log('uwu')
+        return parseArray();
+      }
+
       if(tokens[0].type !== Ttoken.OpenBrace)
       {
         return parseAdditiveExpression();
       }
+
         advance() //advance past open brace
         
         const properties = new Array<PropertyNode>();
@@ -553,6 +581,7 @@ export function parse(inputCode: string): AstNode {
         
        
       }
+
       
       //for anonymous blocks
       function parseBlockExpression(context?:String): AstNode
@@ -578,7 +607,7 @@ export function parse(inputCode: string): AstNode {
         
         //return parseAsignmentExpression()
       }
-}
+      
 
 
 
@@ -586,3 +615,5 @@ export function parse(inputCode: string): AstNode {
 
 
 
+
+    }

@@ -19,7 +19,7 @@ export function evaluate(astNode:AstNode, env:Environment) : ValueNode
                 value: (astNode as NullLiteralNode).value,
                 
             } as NullValueNode;
-        case AstNodeType.BinaryExpression:
+            case AstNodeType.BinaryExpression:
             return evaluateBinaryExpression(astNode as BinaryExpressionNode, env);
         
         case AstNodeType.LoopStatement:
@@ -179,56 +179,53 @@ function evaluateLoopStatement(loop:LoopStatementNode, env:Environment):ValueNod
 {
     const body:BlockNode = loop.body
     switch(loop.loopType)
-    {
-        case "for":
-        {
-            const to:NumericValueNode = evaluate(loop.to, env) as NumericValueNode
-            if(loop.from.type==AstNodeType.VariableDeclaration)
-            {
-                evaluate(loop.from, env)
-                
-                const fromName = (loop.from as VariableDeclarationNode).name
-                if((env.lookup(fromName) as NumericValueNode).value <= to.value)
-                {
-                    while((env.lookup(fromName) as NumericValueNode).value !== to.value)
-                    {
-                        evaluateBlockStatement(body, env);
-                        env.assign((loop.from as VariableDeclarationNode).name, MK_NUMBER((env.lookup(fromName) as NumericValueNode).value+1)) 
-                    }
-                    env.delete(fromName)
-                }    
-                else
-                    while((env.lookup(fromName) as NumericValueNode).value !== to.value)
-                    {
-                        evaluateBlockStatement(body, env);
-                        env.assign((loop.from as VariableDeclarationNode).name, MK_NUMBER((env.lookup(fromName) as NumericValueNode).value-1)) 
-                    }
+    {   
+        case "for": {
+            
+            const to: NumericValueNode = evaluate(loop.to, env) as NumericValueNode;
+          
+            let fromValue: number;
+          
+            if (loop.from.type === AstNodeType.VariableDeclaration) {
+              evaluate(loop.from, env);
+          
+              const fromName = (loop.from as VariableDeclarationNode).name;
+              fromValue = (env.lookup(fromName) as NumericValueNode).value;
+          
+              if (fromValue <= to.value) {
+                while (fromValue !== to.value) {
+                  evaluateBlockStatement(body, env);
+                  env.assign(fromName, MK_NUMBER(++fromValue));
+                }
+                env.delete(fromName);
+              } else {
+                while (fromValue !== to.value) {
+                  evaluateBlockStatement(body, env);
+                  env.assign(fromName, MK_NUMBER(--fromValue));
+                }
+              }
+            } else if (loop.from.type === AstNodeType.AssignmentExpression) {
+              evaluate(loop.from, env);
+          
+              const fromName = ((loop.from as AssignmentExpressionNode).assigne as VariableDeclarationNode).name;
+              fromValue = (env.lookup(fromName) as NumericValueNode).value;
+          
+              if (fromValue <= to.value) {
+                while (fromValue !== to.value) {
+                  evaluateBlockStatement(body, env);
+                  env.assign(fromName, MK_NUMBER(++fromValue));
+                }
+              } else {
+                while (fromValue !== to.value) {
+                  evaluateBlockStatement(body, env);
+                  env.assign(fromName, MK_NUMBER(--fromValue));
+                }
+              }
+            } else {
+              throw "unrecognized";
             }
-
-            //for without var declaration
-            else if(loop.from.type==AstNodeType.AssignmentExpression)
-            {
-                evaluate(loop.from, env)
-                const fromName = ((loop.from as AssignmentExpressionNode).assigne as VariableDeclarationNode).name
-                if((env.lookup(fromName) as NumericValueNode).value <= to.value )
-                    while((env.lookup(fromName) as NumericValueNode).value !== to.value)
-                    {
-                        evaluateBlockStatement(body, env)
-                        env.assign(fromName, MK_NUMBER((env.lookup(fromName) as NumericValueNode).value+1))
-
-                    }
-                else
-                    while((env.lookup(fromName) as NumericValueNode).value !== to.value)
-                    {
-                        evaluateBlockStatement(body, env)
-                        env.assign(fromName, MK_NUMBER((env.lookup(fromName) as NumericValueNode).value-1))
-
-                    }
-            }
-            else
-                throw "unrecognized"
-
-        }
+          }
+          
         break;
         case "while":
             {
@@ -354,12 +351,12 @@ function evaluateConditionalStatements(conditionStmt:ConditionalStatementNode , 
         // the if condition is false, so check the else if conditions
         if(conditionStmt.elifBody){
             for (const elif of conditionStmt.elifBody) {
-            const elifCondition = evaluate(elif.condition, env);
-            if (elifCondition.type === ValueNodeType.BooleanLiteral && (elifCondition as BooleanValueNode).value) {
-                trueElif++;
-                evaluateBlockStatement(elif.body, env);
-                
-            }
+                const elifCondition = evaluate(elif.condition, env);
+                if (elifCondition.type === ValueNodeType.BooleanLiteral && (elifCondition as BooleanValueNode).value) {
+                    trueElif++;
+                    evaluateBlockStatement(elif.body, env);
+                    
+                }
         }
 
     }
@@ -369,7 +366,7 @@ function evaluateConditionalStatements(conditionStmt:ConditionalStatementNode , 
             return evaluateBlockStatement(conditionStmt.elseBody, env);
       } else {
         // no if or else if conditions were true, and there is no else block, so return undefined
-        return MK_NULL();
+        return {} as ValueNode;
       }
 
 

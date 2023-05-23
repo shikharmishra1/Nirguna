@@ -22,7 +22,7 @@ function run() {
   rl.question(">", function(input) {
     const program = parse(input);
     const result = evaluate(program, env);
-    console.log(JSON.stringify(program, null, 2));
+   // console.log(JSON.stringify(program, null, 2));
     
     if(!input || input.includes("exit"))
     {

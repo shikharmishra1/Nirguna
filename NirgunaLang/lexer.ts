@@ -14,6 +14,7 @@ export enum Ttoken {
   Number = "Number",
   EndOfFile = "EndOfFile",
   PurnaViraam = "PurnaViraam",
+  String = "String",
 
   //operators
   ConditionalOperator = "Conditional Operator",
@@ -146,6 +147,13 @@ export function* tokenize(inputCode:string):Generator<Token> {
       }
     
       switch (src[0]) {
+        case '"':
+          src.shift();
+          while (src.length > 0 && src[0] !== '"') {
+            yield token(src.shift(), Ttoken.String);
+          }
+          break;
+
         case "(":
           yield token(src.shift(), Ttoken.OpenParanthesis);
           break;

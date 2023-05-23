@@ -1,40 +1,5 @@
-मान अ = ०।
-मान ब = ६ । 
+मान अ = [४, ६, ७] । 
 
-#चक्र is kind of a super loop which can detect the type of loop according to the arguments you pass into it
+अ = [5, 6] 
 
-#For loop
-चक्र(अ = ६ से 7)
-{
-  लेख(अ)
-} 
-
-#While Loop
-चक्र(अ <= १०)
-{
-  मान स = ६ । 
-  लेख(अ)
-  अ = अ +१ 
-} 
-
-#Do While Loop
-चक्र
-{
-  लेख(अ)
-  अ = अ +१ 
-} जब (अ<१६) 
-
-#decrementing for loop
-चक्र(अ=१५ से ६)
-{
-  लेख(अ)
-}
-
-#नीचे लिखा हुआ विवरण सीमा (scope) के बाहर होने के कारण त्रुटि पैदा करेगा।
-
-
-    
-   
-
-
-
+अ[०]
