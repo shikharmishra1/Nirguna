@@ -14,7 +14,8 @@ export enum Ttoken {
   Number = "Number",
   EndOfFile = "EndOfFile",
   PurnaViraam = "PurnaViraam",
-  String = "String",
+  Quote = "quote",
+  Str = "String",
 
   //operators
   ConditionalOperator = "Conditional Operator",
@@ -145,14 +146,28 @@ export function* tokenize(inputCode:string):Generator<Token> {
         src.shift();
         continue;
       }
+
+      
     
       switch (src[0]) {
+
         case '"':
-          src.shift();
+          let str = "";
+          src.shift(); // Skip the opening double quote
+        
           while (src.length > 0 && src[0] !== '"') {
-            yield token(src.shift(), Ttoken.String);
+            str += src.shift();
+          }
+        
+          if (src[0] === '"') {
+            src.shift(); // Skip the closing double quote
+            yield token(str, Ttoken.Str);
+          } else {
+            // Handle error: Unterminated string
+            throw "error"
           }
           break;
+          
 
         case "(":
           yield token(src.shift(), Ttoken.OpenParanthesis);
@@ -264,6 +279,11 @@ export function* tokenize(inputCode:string):Generator<Token> {
     //defines end of file
     yield token("EOF", Ttoken.EndOfFile);
   }
+  let input = `मान अ = "sdf"।
+  अ = "असदफ़"`
+  const tokens = [...tokenize(input)];
+  console.log(tokens);
+
 
   
   

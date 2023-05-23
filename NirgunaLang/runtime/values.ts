@@ -26,6 +26,8 @@ export enum ValueNodeType {
     value: number;
   }
 
+
+
  
   
   export interface NullValueNode extends ValueNode {
@@ -33,7 +35,12 @@ export enum ValueNodeType {
     value: string;
   }
   
- 
+  export interface StringValueNode extends ValueNode {
+    type: ValueNodeType.StringLiteral,
+    value:string
+  }
+
+  
   
   export interface ObjectLiteralNode extends ValueNode {
     type: ValueNodeType.ObjectLiteral;
@@ -73,9 +80,7 @@ export enum ValueNodeType {
       } as NumericValueNode;
   }
 
-  export interface StringValueNode extends ValueNode {
 
-  }
 
   export type FunctionCall = (params:ValueNode[], env:Environment) => ValueNode;
 

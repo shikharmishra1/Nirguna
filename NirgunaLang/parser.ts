@@ -176,6 +176,9 @@ export function parse(inputCode: string): AstNode {
                 type: AstNodeType.NumericLiteral,
                 value: parseFloat(advance().value),
               } as NumericLiteralNode;
+
+            case Ttoken.Str:
+              return parseStringLiteral();
         
             // Grouping Expressions
             case Ttoken.OpenParanthesis: {
@@ -581,6 +584,11 @@ export function parse(inputCode: string): AstNode {
         
        
       }
+      function parseStringLiteral(): ExpressionNode {
+              let str = advance().value; //advance quote
+
+              return {type:AstNodeType.StringLiteral, value:str} as StringLiteralNode
+      } 
 
       
       //for anonymous blocks
@@ -617,3 +625,5 @@ export function parse(inputCode: string): AstNode {
 
 
     }
+
+

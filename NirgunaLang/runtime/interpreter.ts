@@ -1,5 +1,5 @@
-import { BlockValueNode, BooleanValueNode, FunctionValueNode, MK_NULL, MK_NUMBER, NativeFunctionNode, NullValueNode, NumericValueNode, ObjectValueNode, ValueNode, ValueNodeType} from "./values";
-import {AstNode, FunctionDeclarationNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode, ObjectLiteralNode, CallExpressionNode, BlockNode, ConditionalStatementNode, LoopStatementNode} from "../AST"
+import { BlockValueNode, BooleanValueNode, FunctionValueNode, MK_NULL, MK_NUMBER, NativeFunctionNode, NullValueNode, NumericValueNode, ObjectValueNode, StringValueNode, ValueNode, ValueNodeType} from "./values";
+import {AstNode, FunctionDeclarationNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode, ObjectLiteralNode, CallExpressionNode, BlockNode, ConditionalStatementNode, LoopStatementNode, StringLiteralNode} from "../AST"
 import Environment from "./environment";
 
 export function evaluate(astNode:AstNode, env:Environment) : ValueNode
@@ -12,6 +12,12 @@ export function evaluate(astNode:AstNode, env:Environment) : ValueNode
                 value: (astNode as NumericLiteralNode).value,
                 
             } as NumericValueNode;
+        
+        case AstNodeType.StringLiteral:
+            return {
+                type: ValueNodeType.StringLiteral,
+                value: (astNode as StringLiteralNode).value,
+            } as StringValueNode;
         case AstNodeType.NullLiteral:
             return {
                 
