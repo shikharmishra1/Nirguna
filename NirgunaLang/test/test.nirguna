@@ -1,4 +1,48 @@
-मान अ = [1,2,3,4,5,6,7,8,9,10]। 
-लेख(अ)
-अ = ["स", "सदफ़ ", "ही"]
-लेख(अ)
+
+कर्म सूत्र(बाएँ, केंद्र, दाएँ) {
+  if (left === 1 && center === 1 && right === 1) return 0;
+  if (left === 1 && center === 1 && right === 0) return 1;
+  if (left === 1 && center === 0 && right === 1) return 1;
+  if (left === 1 && center === 0 && right === 0) return 0;
+  if (left === 0 && center === 1 && right === 1) return 1;
+  if (left === 0 && center === 1 && right === 0) return 1;
+  if (left === 0 && center === 0 && right === 1) return 1;
+  if (left === 0 && center === 0 && right === 0) return 0;
+  return 0; // Default case
+}
+
+function generateNextGeneration(cells: number[]): number[] {
+  const nextGeneration: number[] = [];
+
+  for (let i = 0; i < cells.length; i++) {
+    const left = i === 0 ? 0 : cells[i - 1];
+    const center = cells[i];
+    const right = i === cells.length - 1 ? 0 : cells[i + 1];
+
+    const nextState = applyRule110(left, center, right);
+    nextGeneration.push(nextState);
+  }
+
+  return nextGeneration;
+}
+
+function displayGeneration(cells: number[]): void {
+  const generationStr = cells.map(cell => (cell === 1 ? "█" : " ")).join("");
+  console.log(generationStr);
+}
+
+function runRule110(initialGeneration: number[], numGenerations: number): void {
+  let currentGeneration = initialGeneration;
+
+  for (let i = 0; i < numGenerations; i++) {
+    displayGeneration(currentGeneration);
+    currentGeneration = generateNextGeneration(currentGeneration);
+  }
+}
+
+// Example usage
+const initialGeneration = [0, 1, 0, 1, 1, 0, 0, 0, 1, 0]; // Initial state
+const numGenerations = 10; // Number of generations to display
+
+runRule110(initialGeneration, numGenerations);
+

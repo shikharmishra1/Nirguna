@@ -1,5 +1,5 @@
 import { ArrayValueNode, BlockValueNode, BooleanValueNode, FunctionValueNode, MK_NULL, MK_NUMBER, NativeFunctionNode, NullValueNode, NumericValueNode, ObjectValueNode, StringValueNode, ValueNode, ValueNodeType} from "./values";
-import {AstNode, FunctionDeclarationNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode, ObjectLiteralNode, CallExpressionNode, BlockNode, ConditionalStatementNode, LoopStatementNode, StringLiteralNode, ArrayNode} from "../AST"
+import {AstNode, FunctionDeclarationNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode, ObjectLiteralNode, CallExpressionNode, BlockNode, ConditionalStatementNode, LoopStatementNode, StringLiteralNode, ArrayNode, MemberExpressionNode} from "../AST"
 import Environment from "./environment";
 
 export function evaluate(astNode:AstNode, env:Environment) : ValueNode
@@ -62,7 +62,8 @@ export function evaluate(astNode:AstNode, env:Environment) : ValueNode
             {
                 return evaluateConditionalStatements(astNode as ConditionalStatementNode, env);
             }
-        
+        case AstNodeType.MemberExpression:
+            return evaluateMemberExpression(astNode as MemberExpressionNode, env);
 
         
         
@@ -71,6 +72,26 @@ export function evaluate(astNode:AstNode, env:Environment) : ValueNode
     }
             
     
+}
+
+function evaluateMemberExpression(astNode: MemberExpressionNode, env: Environment): ValueNode {
+    const object = evaluate(astNode.object, env);
+    const property = evaluate(astNode.property, env);
+    if(object.type == ValueNodeType.Array)
+    {
+        if(property.type == ValueNodeType.NumericLiteral)
+        {
+            if((property as NumericValueNode).value < 0 || (property as NumericValueNode).value >= (object as ArrayValueNode).value.length)
+                throw 'सूचकांक सीमा के बाहर है'
+            return (object as ArrayValueNode).value[(property as NumericValueNode).value]
+        }
+        else
+        {
+            throw 'index must be a number'
+        }
+    }
+    throw 'index must be a number'
+
 }
 
 function evaluateIdentifier(identifier:IdentifierNode, env:Environment):ValueNode
@@ -115,6 +136,51 @@ function evaluateNumericBinExp(left:NumericValueNode, right:NumericValueNode, op
         
         return {type:ValueNodeType.NumericLiteral,value:result }
     }
+
+function evaluateStringBinOp(left:StringValueNode, right:StringValueNode, operator: string):StringValueNode
+{
+    let result:string = "";
+    switch(operator)
+    {
+        
+        case '+':
+            result=left.value+right.value;
+            break;
+        case '-':
+            result=left.value.replace(right.value, '');
+            break;
+
+        case "*":
+            result=getStringIntersection(left.value,right.value);  //computes intersection of two strings
+            break;
+        
+        default:
+            throw `अमान्य संचालक ${operator} का प्रयोग शब्दों के साथ वर्जित है । `
+        
+
+    }
+    
+    
+    return {type:ValueNodeType.StringLiteral,value:result } as StringValueNode
+}
+
+function getStringIntersection(str1: string, str2: string): string {
+    const set = new Set<string>(str1);
+    const intersection: string[] = [];
+  
+    for (const char of str2) {
+      if (set.has(char)) {
+        intersection.push(char);
+        set.delete(char);
+      }
+    }
+  
+    return intersection.join('');
+  }
+  
+  
+
+  
 
 function evaluateBooleanBinExp(left:BooleanValueNode, right:BooleanValueNode, operator: string):BooleanValueNode
 {
@@ -183,6 +249,7 @@ function evaluateLogicalExpression(left:NumericValueNode, right:NumericValueNode
     //console.log(result)
     return {type:ValueNodeType.BooleanLiteral,value:result } as BooleanValueNode
 }
+
 
 function evaluateLoopStatement(loop:LoopStatementNode, env:Environment):ValueNode
 {
@@ -276,11 +343,17 @@ function evaluateBinaryExpression(operation:BinaryExpressionNode, env:Environmen
             
     }
 
+    else if (left.type == ValueNodeType.StringLiteral && right.type == ValueNodeType.StringLiteral && ["<", ""]) {
+        
+        return evaluateStringBinOp(left as StringValueNode, right as StringValueNode, operation.operator);
+            
+    }
+
    if (left.type == ValueNodeType.BooleanLiteral && right.type == ValueNodeType.BooleanLiteral) {
         
         return evaluateBooleanBinExp(left as BooleanValueNode, right as BooleanValueNode, operation.operator);
     }
-    return {type:ValueNodeType.NullLiteral, value:"निर्गुण"} as NullValueNode
+    throw "invalid operation"
     
 }
 
@@ -297,6 +370,14 @@ export function evaluateAssignmentExpression(assignment: AssignmentExpressionNod
 {
     if(assignment.assigne.type !== AstNodeType.Identifier)
     {
+        if (assignment.assigne.type === AstNodeType.MemberExpression) {
+            const object = evaluate((assignment.assigne as MemberExpressionNode).object, env);
+            const property = evaluate((assignment.assigne as MemberExpressionNode).property, env);
+            const name = ((assignment.assigne as MemberExpressionNode).object as IdentifierNode).name;
+            const arr = (env.lookup(name) as ArrayValueNode).value;
+            arr[(property as NumericValueNode).value] = evaluate(assignment.value, env);
+            return env.assign(name, {type: ValueNodeType.Array, value: arr} as ArrayValueNode);
+        }
         throw 'can not assign to non identifier node \n गैर पहचानकर्ता नोड को आवंटित नहीं किया जा सकता'
     }
     const name = (assignment.assigne as IdentifierNode).name

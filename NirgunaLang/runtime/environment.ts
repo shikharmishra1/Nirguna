@@ -45,13 +45,17 @@ export default class Environment{
         return value;
     }
 
-    public assign(name:string, value:ValueNode):ValueNode
+    public assign(name:string, value:ValueNode, index?:number):ValueNode
     {
         const env = this.resolve(name);
 
         //can't assign to a constant
         if(this.constants.has(name))
             throw "नित्य मान "+{name}+" को पुनर्नियत नहीं किया जा सकता"
+        if(index)
+        {
+            
+        }
 
         env.variables.set(name, value);
         return value

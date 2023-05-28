@@ -4,7 +4,7 @@ import Environment from "./environment";
 export enum ValueNodeType {
     BinaryExpression = "BinaryExpression",
     Identifier = "Identifier",
-    NumericLiteral = "NumericLiteral",
+    NumericLiteral = "संख्या",
     NullLiteral = "NullLiteral",
     VariableDeclaration = "VariableDeclaration",
     Statement = "Statement",
