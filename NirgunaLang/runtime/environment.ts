@@ -1,5 +1,5 @@
 import { ok } from 'assert';
-import {MK_BOOL, MK_NULL, MK_Native_FN, ValueNode} from './values'
+import {MK_BOOL, MK_NULL, MK_Native_FN, StringValueNode, ValueNode} from './values'
 
 export function createGlobalScope()
     {
@@ -10,7 +10,10 @@ export function createGlobalScope()
         //define native functions
         env.declare("लेख", MK_Native_FN((params, scope)=>
         {   
-            console.log(...params);
+            for(let param of params)
+            {
+                console.log((param as StringValueNode).value)
+            }
             return MK_NULL();
         }), true);
         return env

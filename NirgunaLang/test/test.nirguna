@@ -1,48 +1,54 @@
+कर्म सूत्र११०(कोशिका, लंबाई){
+  
+  नित्य नईकोशिका = []। 
 
-कर्म सूत्र(बाएँ, केंद्र, दाएँ) {
-  if (left === 1 && center === 1 && right === 1) return 0;
-  if (left === 1 && center === 1 && right === 0) return 1;
-  if (left === 1 && center === 0 && right === 1) return 1;
-  if (left === 1 && center === 0 && right === 0) return 0;
-  if (left === 0 && center === 1 && right === 1) return 1;
-  if (left === 0 && center === 1 && right === 0) return 1;
-  if (left === 0 && center === 0 && right === 1) return 1;
-  if (left === 0 && center === 0 && right === 0) return 0;
-  return 0; // Default case
-}
+  चक्र (मान अ=० । से लंबाई){
+    नित्य बाएँ = असत्य। 
+    यदि(अ==०)
+        {बाएँ = असत्य}
+    उत
+        {बाएँ=कोशिका[अ- 1]}
 
-function generateNextGeneration(cells: number[]): number[] {
-  const nextGeneration: number[] = [];
+    नित्य केंद्र = कोशिका[अ]।
+    नित्य दाएँ = असत्य।
+    यदि(अ == (लंबाई - 1)) 
+    {दाएँ  = असत्य} 
+    उत
+    {दाएँ=कोशिका[अ+ 1]}
 
-  for (let i = 0; i < cells.length; i++) {
-    const left = i === 0 ? 0 : cells[i - 1];
-    const center = cells[i];
-    const right = i === cells.length - 1 ? 0 : cells[i + 1];
-
-    const nextState = applyRule110(left, center, right);
-    nextGeneration.push(nextState);
+    नित्य नईस्थिति = ((बाएँ और !केंद्र और !दाएँ) या (!बाएँ और केंद्र और दाएँ) या (!बाएँ और केंद्र और !दाएँ) या (!बाएँ और !केंद्र और दाएँ))। 
+    नईकोशिका[अ] = नईस्थिति
   }
 
-  return nextGeneration;
+    नईकोशिका
 }
 
-function displayGeneration(cells: number[]): void {
-  const generationStr = cells.map(cell => (cell === 1 ? "█" : " ")).join("");
-  console.log(generationStr);
-}
-
-function runRule110(initialGeneration: number[], numGenerations: number): void {
-  let currentGeneration = initialGeneration;
-
-  for (let i = 0; i < numGenerations; i++) {
-    displayGeneration(currentGeneration);
-    currentGeneration = generateNextGeneration(currentGeneration);
+कर्म कोशिकादिखाओ(कोशिका, लंबाई) {
+  मान दिखाओ = ""। 
+  चक्र (मान  अ = ० । से लंबाई) {
+    यदि(कोशिका[अ])
+        {दिखाओ = दिखाओ+"●"}
+    उत
+        {दिखाओ = दिखाओ+" "}
   }
+  दिखाओ
 }
 
-// Example usage
-const initialGeneration = [0, 1, 0, 1, 1, 0, 0, 0, 1, 0]; // Initial state
-const numGenerations = 10; // Number of generations to display
 
-runRule110(initialGeneration, numGenerations);
+मान कोशिका= [] । 
+मान लंबाई = 100 ।
+चक्र(मान अ = ० । से लंबाई)
+  {
+    कोशिका[अ] = असत्य
+  }
+  कोशिका[लंबाई/2] = सत्य
+
+लेख(कोशिकादिखाओ(कोशिका, लंबाई))
+
+चक्र (मान अ = 0।  से 50) {
+  
+  कोशिका = सूत्र११०(कोशिका, लंबाई)
+
+  लेख(कोशिकादिखाओ(कोशिका, लंबाई))
+}
 

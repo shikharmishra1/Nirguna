@@ -22,6 +22,8 @@ import {
   LoopStatementNode,
   StringLiteralNode,
   ArrayNode,
+  
+  UnaryExpressionNode,
 } from "./AST";
 import { MK_NULL } from "./runtime/values";
 
@@ -108,13 +110,14 @@ export function parse(inputCode: string): AstNode {
 
     function parseConditionalExpression():ExpressionNode
     {
-        let left = parseCallMemberExpression();
+        let left = parseUnaryExpression();
 
         while(tokens[0].type==Ttoken.AndOperator||tokens[0].type==Ttoken.OrOperator||tokens[0].type==Ttoken.ConditionalOperator)
         {
             const operator = advance().value;
             
-            const right = parseCallMemberExpression();
+            const right = parseUnaryExpression();
+            
             left = {
                 type: AstNodeType.BinaryExpression,
                 operator:operator,
@@ -142,6 +145,22 @@ export function parse(inputCode: string): AstNode {
         }
         return left;
     }
+    function parseUnaryExpression():ExpressionNode
+    {
+      while(tokens[0].type==Ttoken.UnaryOperator)
+      {
+        const operator = advance().value;
+        const right = parseCallMemberExpression();
+        return {
+          type: AstNodeType.UnaryExpression,
+          operator:operator,
+          operand:right,
+        } as UnaryExpressionNode;
+      }
+      
+      return parseCallMemberExpression();
+    }
+   
     function parseMultiplicativeExpression():ExpressionNode
     {
         //parse the expression with the highest precedence
@@ -176,6 +195,7 @@ export function parse(inputCode: string): AstNode {
                 type: AstNodeType.NumericLiteral,
                 value: parseFloat(advance().value),
               } as NumericLiteralNode;
+            
 
             case Ttoken.Str:
               return parseStringLiteral();

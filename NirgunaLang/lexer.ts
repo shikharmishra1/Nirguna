@@ -10,7 +10,7 @@ export enum Ttoken {
   OpenBracket = "OpenBracket", CloseBracket = "CloseBracket",
   Colon = "Colon",
 
-  BinaryOperator = "BinaryOperator",
+  
   Number = "Number",
   EndOfFile = "EndOfFile",
   PurnaViraam = "PurnaViraam",
@@ -19,10 +19,12 @@ export enum Ttoken {
 
   //operators
   ConditionalOperator = "Conditional Operator",
+  BinaryOperator = "BinaryOperator",
   DotOperator = "Dot Operator",
   AndOperator = "AndOperator",
   OrOperator = "OrOperator",
   NotOperator = "NotOperator",
+  UnaryOperator = "UnaryOperator",
 
 
   //keywords
@@ -127,7 +129,7 @@ export function* tokenize(inputCode:string):Generator<Token> {
     let skipLine = false;
     
     //tokenizes the input code, yielding tokens one by one to save memory
-    console.time("tokenize");
+    
     while (src.length > 0) {
       const uwu = convertHindiToStandardDigits(src[0]);
     
@@ -188,6 +190,9 @@ export function* tokenize(inputCode:string):Generator<Token> {
         case "%":
           yield token(src.shift(), Ttoken.BinaryOperator);
           break;
+        case "!":
+          yield token(src.shift(), Ttoken.UnaryOperator);
+          break;
         case ".":
           yield token(src.shift(), Ttoken.DotOperator);
           break;
@@ -238,10 +243,13 @@ export function* tokenize(inputCode:string):Generator<Token> {
           // Handles identifiers and keywords
           if (hindiIdentifierRegex.test(src[0]) && !(/[०-९]/g.test(src[0]))) {
             let identifier = "";
-            while (src.length > 0 && hindiIdentifierRegex.test(src[0])) {
+            while (src.length > 0 && hindiIdentifierRegex.test(src[0]) ) {
+
+              
               identifier += src.shift();
             }
             if (KEYWORDS[identifier] !== undefined) {
+
               if (identifier == 'उत') {
                 if (src[1] + src[2] + src[3] == '\u092f\u0926\u093f') {
                   src.shift();
@@ -250,10 +258,14 @@ export function* tokenize(inputCode:string):Generator<Token> {
                   src.shift();
                   yield token('उत यदि', KEYWORDS['उत यदि']);
                 } else {
+                  
                   yield token(identifier, KEYWORDS[identifier]);
                 }
               }
-              yield token(identifier, KEYWORDS[        identifier]);
+              
+              yield token(identifier, KEYWORDS[identifier]);
+              console.log(KEYWORDS[identifier])
+
             } else {
               yield token(identifier, Ttoken.Identifier);
             }
@@ -273,17 +285,15 @@ export function* tokenize(inputCode:string):Generator<Token> {
           }
         }
       }
-    console.timeEnd("tokenize");
+    
     
 
     //defines end of file
     yield token("EOF", Ttoken.EndOfFile);
+    
+    
   }
-  let input = `मान अ = "sdf"।
-  अ = "असदफ़"`
-  const tokens = [...tokenize(input)];
-  console.log(tokens);
-
+  console.log('sdf')
 
   
   

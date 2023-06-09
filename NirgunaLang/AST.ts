@@ -3,6 +3,7 @@ import { type } from "os";
 export enum AstNodeType {
     Program = "Program",
     BinaryExpression = "BinaryExpression",
+    UnaryExpression = "UnaryExpression",
     Identifier = "Identifier",
     NumericLiteral = "Literal",
     NullLiteral = "NullLiteral",
@@ -21,6 +22,7 @@ export enum AstNodeType {
     LoopStatement="LoopStatement",
     StringLiteral="StringLiteral",
     Array="Array",
+
   }
 
   export interface AssignmentExpressionNode extends ExpressionNode {
@@ -91,6 +93,11 @@ export enum AstNodeType {
     operator: string;
     left: ExpressionNode;
     right: ExpressionNode;
+  }
+  export interface UnaryExpressionNode extends ExpressionNode {
+    type: AstNodeType.UnaryExpression;
+    operator: string;
+    operand: ExpressionNode;
   }
   
   

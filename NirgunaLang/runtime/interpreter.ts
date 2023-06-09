@@ -1,5 +1,5 @@
 import { ArrayValueNode, BlockValueNode, BooleanValueNode, FunctionValueNode, MK_NULL, MK_NUMBER, NativeFunctionNode, NullValueNode, NumericValueNode, ObjectValueNode, StringValueNode, ValueNode, ValueNodeType} from "./values";
-import {AstNode, FunctionDeclarationNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode, ObjectLiteralNode, CallExpressionNode, BlockNode, ConditionalStatementNode, LoopStatementNode, StringLiteralNode, ArrayNode, MemberExpressionNode} from "../AST"
+import {AstNode, FunctionDeclarationNode, AstNodeType, ProgramNode, StatementNode, NumericLiteralNode, NullLiteralNode, BinaryExpressionNode, IdentifierNode, VariableDeclarationNode, AssignmentExpressionNode, ObjectLiteralNode, CallExpressionNode, BlockNode, ConditionalStatementNode, LoopStatementNode, StringLiteralNode, ArrayNode, MemberExpressionNode, UnaryExpressionNode} from "../AST"
 import Environment from "./environment";
 
 export function evaluate(astNode:AstNode, env:Environment) : ValueNode
@@ -64,6 +64,9 @@ export function evaluate(astNode:AstNode, env:Environment) : ValueNode
             }
         case AstNodeType.MemberExpression:
             return evaluateMemberExpression(astNode as MemberExpressionNode, env);
+        case AstNodeType.UnaryExpression:
+            return evaluateUnaryExpression(astNode as UnaryExpressionNode, env);
+
 
         
         
@@ -82,7 +85,7 @@ function evaluateMemberExpression(astNode: MemberExpressionNode, env: Environmen
         if(property.type == ValueNodeType.NumericLiteral)
         {
             if((property as NumericValueNode).value < 0 || (property as NumericValueNode).value >= (object as ArrayValueNode).value.length)
-                throw 'सूचकांक सीमा के बाहर है'
+                throw `${(object as ArrayValueNode).value}`
             return (object as ArrayValueNode).value[(property as NumericValueNode).value]
         }
         else
@@ -100,6 +103,18 @@ function evaluateIdentifier(identifier:IdentifierNode, env:Environment):ValueNod
     return value
 }
 
+function evaluateUnaryExpression(node:UnaryExpressionNode, env:Environment):BooleanValueNode
+{
+    switch(node.operator)
+    {
+        case "!":
+            const operand = (evaluate(node.operand, env) as BooleanValueNode).value;
+            
+            return {type:ValueNodeType.BooleanLiteral, value:!(operand)} as BooleanValueNode
+        default:
+            throw "not a unary expression"
+    }
+}
 
 function evaluateNumericBinExp(left:NumericValueNode, right:NumericValueNode, operator: string):NumericValueNode
     {
@@ -188,6 +203,7 @@ function evaluateBooleanBinExp(left:BooleanValueNode, right:BooleanValueNode, op
     switch(operator)
     {
         case '+':
+            result = left.value || right.value
         case '-':
         case "*":           
         case "/":
