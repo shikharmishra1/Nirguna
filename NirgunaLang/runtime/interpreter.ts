@@ -195,7 +195,38 @@ function getStringIntersection(str1: string, str2: string): string {
   
   
 
-  
+function evaluateArrayBinExp(left:ArrayValueNode, right:ArrayValueNode, operator: string):ArrayValueNode
+{
+    let result:ValueNode[] = [];
+    switch(operator)
+    {
+        case '+':
+            result = left.value.concat(right.value)
+            break
+        case '-':
+            result = left.value.filter((element) => !right.value.includes(element))
+            break
+        case "*":
+            result = left.value.filter(element => right.value.includes(element));
+            break
+        case "/":
+        case "%":
+        case "==":
+            `${ValueNodeType.Array} पे कार्य के समय ${operator} का प्रयोग वर्जित है । `;
+            break;
+
+        
+        case "और":
+            result = left.value && right.value
+            break;
+        case "या":
+            result = left.value || right.value
+            break;
+        
+            break;
+    }
+    return {type:ValueNodeType.Array, value:result} as ArrayValueNode
+} 
 
 function evaluateBooleanBinExp(left:BooleanValueNode, right:BooleanValueNode, operator: string):BooleanValueNode
 {
@@ -270,8 +301,10 @@ function evaluateLogicalExpression(left:NumericValueNode, right:NumericValueNode
 function evaluateLoopStatement(loop:LoopStatementNode, env:Environment):ValueNode
 {
     const body:BlockNode = loop.body
+    const scope = new Environment(env);
     switch(loop.loopType)
     {   
+        
         case "for": {
             
             const to: NumericValueNode = evaluate(loop.to, env) as NumericValueNode;
@@ -279,38 +312,38 @@ function evaluateLoopStatement(loop:LoopStatementNode, env:Environment):ValueNod
             let fromValue: number;
           
             if (loop.from.type === AstNodeType.VariableDeclaration) {
-              evaluate(loop.from, env);
+              evaluate(loop.from, scope);
           
               const fromName = (loop.from as VariableDeclarationNode).name;
-              fromValue = (env.lookup(fromName) as NumericValueNode).value;
+              fromValue = (scope.lookup(fromName) as NumericValueNode).value;
           
               if (fromValue <= to.value) {
                 while (fromValue !== to.value) {
-                  evaluateBlockStatement(body, env);
-                  env.assign(fromName, MK_NUMBER(++fromValue));
+                  evaluateBlockStatement(body, scope);
+                  scope.assign(fromName, MK_NUMBER(++fromValue));
                 }
-                env.delete(fromName);
+                scope.delete(fromName);
               } else {
                 while (fromValue !== to.value) {
-                  evaluateBlockStatement(body, env);
-                  env.assign(fromName, MK_NUMBER(--fromValue));
+                  evaluateBlockStatement(body, scope);
+                  scope.assign(fromName, MK_NUMBER(--fromValue));
                 }
               }
             } else if (loop.from.type === AstNodeType.AssignmentExpression) {
-              evaluate(loop.from, env);
+              evaluate(loop.from, scope);
           
               const fromName = ((loop.from as AssignmentExpressionNode).assigne as VariableDeclarationNode).name;
-              fromValue = (env.lookup(fromName) as NumericValueNode).value;
+              fromValue = (scope.lookup(fromName) as NumericValueNode).value;
           
               if (fromValue <= to.value) {
                 while (fromValue !== to.value) {
-                  evaluateBlockStatement(body, env);
-                  env.assign(fromName, MK_NUMBER(++fromValue));
+                  evaluateBlockStatement(body, scope);
+                  scope.assign(fromName, MK_NUMBER(++fromValue));
                 }
               } else {
                 while (fromValue !== to.value) {
-                  evaluateBlockStatement(body, env);
-                  env.assign(fromName, MK_NUMBER(--fromValue));
+                  evaluateBlockStatement(body, scope);
+                  scope.assign(fromName, MK_NUMBER(--fromValue));
                 }
               }
             } else {
@@ -321,9 +354,9 @@ function evaluateLoopStatement(loop:LoopStatementNode, env:Environment):ValueNod
         break;
         case "while":
             {
-                while((evaluate(loop.whileCondition, env) as BooleanValueNode).value)
+                while((evaluate(loop.whileCondition, scope) as BooleanValueNode).value)
                 {
-                    evaluateBlockStatement(body, env)
+                    evaluateBlockStatement(body, scope)
                 }
                break; 
             }
@@ -331,8 +364,8 @@ function evaluateLoopStatement(loop:LoopStatementNode, env:Environment):ValueNod
             {
                 do
                 {
-                    evaluateBlockStatement(body, env)
-                } while((evaluate(loop.whileCondition, env) as BooleanValueNode).value)
+                    evaluateBlockStatement(body, scope)
+                } while((evaluate(loop.whileCondition, scope) as BooleanValueNode).value)
 
 
             }

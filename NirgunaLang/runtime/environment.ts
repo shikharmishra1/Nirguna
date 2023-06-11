@@ -1,5 +1,5 @@
 import { ok } from 'assert';
-import {MK_BOOL, MK_NULL, MK_Native_FN, StringValueNode, ValueNode} from './values'
+import {ArrayValueNode, MK_BOOL, MK_NULL, MK_Native_FN, NumericValueNode, StringValueNode, ValueNode, ValueNodeType} from './values'
 
 export function createGlobalScope()
     {
@@ -12,11 +12,37 @@ export function createGlobalScope()
         {   
             for(let param of params)
             {
-                console.log((param as StringValueNode).value)
+                console.log('value' in param? param.value: param.type)
             }
             return MK_NULL();
         }), true);
+        env.declare("प्रकार", MK_Native_FN((params, scope)=>
+        {   
+            if(params.length != 1)
+            {
+                throw `प्रकार कर्म को केवल एक मापक की अपेछा थी, परंतु मिला ${params.length}`
+            }
+                return {value:params[0].type} as StringValueNode
+        }), true);
+        env.declare("पूर्ण", MK_Native_FN((params, scope)=>
+        {   
+            if(params.length != 4)
+            {
+                throw `पूर्ण कर्म को केवल २ मापक की अपेछा थी, परंतु मिला ${params.length}`
+            }
+            if(params[0].type == ValueNodeType.Array )
+            {
+                let newArray:ValueNode[] = (params[0] as ArrayValueNode).value;
+                
+                return {type:ValueNodeType.Array, value:newArray} as ArrayValueNode
+            }
+
+            throw "सूची की अपेछा थी परंतु मिला "+params[0].type
+        }), true);
+       
         return env
+        
+        
     }
 
 export default class Environment{

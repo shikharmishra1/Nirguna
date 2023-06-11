@@ -94,7 +94,11 @@ export function parse(inputCode: string): AstNode {
           advance();
         }
       }
+
+
       expect(Ttoken.CloseBracket, "] की अपेक्षा थी।")
+      console.log(tokens.at(0)?.type)
+      
       //expect(Ttoken.PurnaViraam, "पूर्णविराम की अपेक्षा थी।")
       return {type:AstNodeType.Array, value:elements} as ArrayNode
     }
@@ -270,9 +274,8 @@ export function parse(inputCode: string): AstNode {
     }
     function parseObjectExpression():ExpressionNode
     {
-      if(tokens.at(0)?.type == Ttoken.OpenBracket)
+      while(tokens.at(0)?.type == Ttoken.OpenBracket)
       {
-        console.log('uwu')
         return parseArray();
       }
 
