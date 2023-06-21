@@ -7,6 +7,23 @@ import fs from 'fs'
 import { MK_BOOL, MK_NUMBER, NumericValueNode, ValueNodeType } from './runtime/values';
 
 const env = createGlobalScope();
+const args= process.argv.slice(2);
+
+if(args.length == 0)
+{
+  run();
+}
+else if(args.length == 1)
+{
+  const ext = args[0].split('.').pop();
+  if(ext == 'nirguna' || ext == 'ng')
+    run2(args[0]);
+  else
+    throw "Invalid file extension use either .nirguna or .ng"
+}
+else{
+ throw "Invalid number of arguments" 
+}
 
 function run2 (file:string)
 {
@@ -19,6 +36,11 @@ function run2 (file:string)
 }
 
 function run() {
+  
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
   rl.question(">", function(input) {
     const program = parse(input);
     const result = evaluate(program, env);
@@ -32,9 +54,5 @@ function run() {
   });
 }
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-run2('./test/test.nirguna');
+
 //run();

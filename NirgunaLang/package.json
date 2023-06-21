@@ -1,6 +1,9 @@
 {
+  "name": "nirguna-interpreter",
+  "version": "1.0.0",
+  "main": "./dist/main.js",
+  "bin": "./dist/main.js",
   "dependencies": {
-    "queue": "^7.0.0",
     "xregexp": "^5.1.1"
   },
   "devDependencies": {
@@ -10,5 +13,11 @@
     "start": "node ./dist/main.js",
     "build": "tsc && node ./dist/main.js",
     "compile": "tsc && node ./dist/compiler/assemblyGenerator.js && nasm"
+  },
+  "pkg": {
+    "scripts": "start",
+    "targets": [
+      "node16-win-x64"
+    ]
   }
 }
