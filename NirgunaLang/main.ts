@@ -35,12 +35,9 @@ function run2 (file:string)
   
 }
 
+
+
 function run() {
-  
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
   rl.question(">", function(input) {
     const program = parse(input);
     const result = evaluate(program, env);
@@ -54,5 +51,9 @@ const rl = readline.createInterface({
   });
 }
 
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
 //run();
